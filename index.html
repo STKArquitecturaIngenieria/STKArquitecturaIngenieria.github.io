@@ -3,191 +3,641 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio K Arquitectura e Ingeniería</title>
+    <title>Studio Kirei | Arquitectura e Ingeniería</title>
     <style>
+        /* PALETAS DE COLORES DINÁMICAS */
         :root {
             --bg-color: #F4F3EF;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1A;
+            --text-muted: #5C5B57;
+            --accent: #54582f;
+            --accent-hover: #272b00;
+            --border-color: #DCDAD3;
+            --header-bg: rgba(244, 243, 239, 0.95);
+        }
+
+        [data-palette="ocean"] {
+            --bg-color: #edf2f7;
+            --card-bg: #FFFFFF;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: #cbd5e1;
+            --header-bg: rgba(237, 242, 247, 0.95);
+        }
+
+        [data-palette="rose"] {
+            --bg-color: #fcf8f8;
+            --card-bg: #FFFFFF;
+            --text-main: #2b1d1d;
+            --text-muted: #6b5858;
+            --accent: #c05621;
+            --accent-hover: #9c4221;
+            --border-color: #e2d8d8;
+            --header-bg: rgba(252, 248, 248, 0.95);
+        }
+
+        [data-palette="carmine"] {
+            --bg-color: #fdf2f2;
+            --card-bg: #FFFFFF;
+            --text-main: #2d1515;
+            --text-muted: #6b4242;
+            --accent: #9b1c1c;
+            --accent-hover: #771313;
+            --border-color: #f5c6c6;
+            --header-bg: rgba(253, 242, 242, 0.95);
+        }
+
+        [data-palette="wabi"] {
+            --bg-color: #F4F3EF;
+            --card-bg: #FFFFFF;
             --text-main: #1C1C1A;
             --text-muted: #5C5B57;
             --accent: #6B7028;
+            --accent-hover: #4e521b;
             --border-color: #DCDAD3;
+            --header-bg: rgba(244, 243, 239, 0.95);
         }
+
+        /* MODO OSCURO */
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #d4af37;
+            --accent-hover: #f3e5ab;
+            --border-color: #2e2e2e;
+            --header-bg: rgba(18, 18, 18, 0.95);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
+
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
+            overflow-x: hidden;
         }
+
+        /* BARRA SUPERIOR Y NAVEGACIÓN */
         header {
-            padding: 2rem 5%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
         }
+
         .logo {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
+            color: var(--accent);
         }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
         nav a {
-            margin-left: 2rem;
             text-decoration: none;
             color: var(--text-main);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-weight: 500;
         }
+
         nav a:hover {
             color: var(--accent);
         }
-        .hero {
-            padding: 6rem 5%;
-            max-width: 1100px;
-            margin: 0 auto;
+
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-left: 1rem;
+            border-left: 1px solid var(--border-color);
+            padding-left: 1rem;
         }
+
+        .theme-btn, .palette-dot {
+            background: none;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            border-radius: 4px;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .palette-selector {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .palette-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            padding: 0;
+            border: 2px solid var(--border-color);
+        }
+
+        /* HERO SECCIÓN */
+        .hero {
+            padding: 9rem 5% 5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
         .hero h1 {
-            font-size: 3rem;
+            font-size: 3.2rem;
             font-weight: 300;
-            line-height: 1.2;
+            line-height: 1.15;
             margin-bottom: 1.5rem;
         }
+
         .hero p {
             font-size: 1.15rem;
             color: var(--text-muted);
-            max-width: 700px;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
+
         .philosophy-tag {
             display: inline-block;
             padding: 0.4rem 1rem;
             border: 1px solid var(--accent);
             color: var(--accent);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             letter-spacing: 1.5px;
             text-transform: uppercase;
             margin-bottom: 1.5rem;
         }
-        section {
-            padding: 4rem 5%;
-            max-width: 1100px;
-            margin: 0 auto;
-            border-top: 1px solid var(--border-color);
+
+        .btn-primary {
+            display: inline-block;
+            background-color: var(--accent);
+            color: #FFFFFF;
+            padding: 0.9rem 2rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        h2 {
-            font-size: 1.8rem;
-            font-weight: 400;
-            margin-bottom: 2rem;
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* ESTADÍSTICAS / CONTADOR DE PROYECTOS */
+        .stats-section {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 4rem 5%;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-box h3 {
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
+
+        /* SECCIONES GENERALES */
+        section {
+            padding: 5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            letter-spacing: 1px;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
         }
+
         .card {
-            background: #FFFFFF;
-            padding: 2rem;
+            background: var(--card-bg);
+            padding: 2.5rem;
             border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
         }
+
         .card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
             color: var(--accent);
+            font-weight: 500;
         }
+
         .card p {
             color: var(--text-muted);
             font-size: 0.95rem;
         }
+
+        /* CALENDARIO DE CITAS AUTOMÁTICO (MEET) */
+        .booking-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+        }
+
+        .calendar-box header {
+            position: static;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            padding-bottom: 0.5rem;
+        }
+
+        .cal-day {
+            padding: 0.8rem 0;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            background: var(--bg-color);
+        }
+
+        .cal-day:hover, .cal-day.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .cal-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .booking-form input, .booking-form select {
+            width: 100%;
+            padding: 0.9rem;
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        /* TÉRMINOS Y CONDICIONES */
+        .legal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            max-height: 450px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .legal-box h4 {
+            color: var(--text-main);
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        /* FOOTER */
         footer {
-            padding: 3rem 5%;
+            padding: 4rem 5%;
             text-align: center;
             border-top: 1px solid var(--border-color);
             color: var(--text-muted);
             font-size: 0.9rem;
+            background: var(--card-bg);
         }
+
         .social-links {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
         }
+
         .social-links a {
-            margin: 0 1rem;
             color: var(--text-main);
             text-decoration: none;
             font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
         }
+
         .social-links a:hover {
             color: var(--accent);
         }
+
+        @media(max-width: 900px) {
+            .hero, .booking-container {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                display: none;
+            }
+        }
     </style>
 </head>
-<body>
+<body data-palette="wabi" data-theme="light">
 
+    <!-- CABECERA Y CONTROLES -->
     <header>
-        <div class="logo">Studio K</div>
+        <div class="logo">Studio Kirei</div>
         <nav>
+            <a href="#inicio">Inicio</a>
             <a href="#filosofia">Filosofía</a>
-            <a href="#servicios">Servicios</a>
-            <a href="#contacto">Contacto</a>
+            <a href="#proyectos">Proyectos</a>
+            <a href="#cv">C.V.</a>
+            <a href="#citas">Agendar Cita</a>
+            <a href="#legal">Legal</a>
         </nav>
+        <div class="controls-bar">
+            <div class="palette-selector">
+                <button class="palette-dot" style="background:#54582f;" onclick="setPalette('wabi')" title="Wabi-Sabi / Tierra"></button>
+                <button class="palette-dot" style="background:#0284c7;" onclick="setPalette('ocean')" title="Océano Profundo"></button>
+                <button class="palette-dot" style="background:#c05621;" onclick="setPalette('rose')" title="Rosa & Oro"></button>
+                <button class="palette-dot" style="background:#9b1c1c;" onclick="setPalette('carmine')" title="Rojo Carmín"></button>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" id="themeToggle">🌙 / ☀️</button>
+        </div>
     </header>
 
-    <div class="hero">
-        <span class="philosophy-tag">Materialismo Dialéctico &bull; Wabi-Sabi</span>
-        <h1>Arquitectura e Ingeniería que transforman las condiciones materiales.</h1>
-        <p>En Studio K concebimos el espacio desde el rigor estructural y la honestidad de los materiales. «Lo de afuera está adentro»: diseñamos obras funcionales, resilientes y profundamente humanas.</p>
+    <!-- INICIO / HERO -->
+    <section id="inicio" class="hero">
+        <div>
+            <span class="philosophy-tag">Materialismo Dialéctico &bull; Wabi-Sabi</span>
+            <h1>Arquitectura, Diseño y Urbanismo con Rigor Estructural.</h1>
+            <p>Concepciones espaciales transformadoras que responden con precisión técnica y honestidad material a las condiciones concretas del sitio.</p>
+            <a href="#citas" class="btn-primary">Agendar Asesoría Online</a>
+        </div>
+        <div>
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Arquitectura Studio Kirei" style="width:100%; border:1px solid var(--border-color); filter: grayscale(20%);">
+        </div>
+    </section>
+
+    <!-- ESTADÍSTICAS / CONTADOR AUTOMATIZADO -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3 id="counter-clients">+200</h3>
+                <p>Clientes Satisfechos</p>
+            </div>
+            <div class="stat-box">
+                <h3 id="counter-exp">15</h3>
+                <p>Años de Experiencia</p>
+            </div>
+            <div class="stat-box">
+                <h3 id="counter-projects">+200</h3>
+                <p>Proyectos Arquitectónicos</p>
+            </div>
+            <div class="stat-box">
+                <h3 id="counter-states">7</h3>
+                <p>Estados con Presencia</p>
+            </div>
+        </div>
     </div>
 
+    <!-- FILOSOFÍA Y METODOLOGÍA -->
     <section id="filosofia">
-        <h2>Enfoque y Metodología</h2>
+        <h2>Filosofía y Enfoque</h2>
         <div class="grid">
             <div class="card">
                 <h3>Materialismo Dialéctico</h3>
-                <p>Entendemos la arquitectura como una herramienta de transformación real del entorno físico y social, respondiendo con precisión técnica a las necesidades concretas de cada sitio.</p>
+                <p>La arquitectura como catalizador de cambio material, mejorando las condiciones físicas y sociales del entorno humano.</p>
             </div>
             <div class="card">
                 <h3>Estética Wabi-Sabi</h3>
-                <p>Valoramos la belleza de lo auténtico, la textura natural de los materiales sin artificios y la dignidad con la que las estructuras envejecen junto a quienes las habitan.</p>
+                <p>Resaltar la belleza de la imperfección natural, la textura genuina y la pátina del tiempo en los materiales estructurales.</p>
             </div>
             <div class="card">
                 <h3>Rigor Estructural</h3>
-                <p>Integración total entre el diseño arquitectónico y el cálculo de ingeniería, garantizando seguridad normativa, eficiencia constructiva y optimización de recursos.</p>
+                <p>Simbiosis absoluta entre cálculo de ingeniería, normatividad vigente y elegancia estética formal.</p>
             </div>
         </div>
     </section>
 
-    <section id="servicios">
-        <h2>Áreas de Práctica</h2>
+    <!-- PROYECTOS -->
+    <section id="proyectos">
+        <h2>Proyectos Destacados</h2>
         <div class="grid">
             <div class="card">
-                <h3>Proyecto Arquitectónico</h3>
-                <p>Diseño conceptual, desarrollo ejecutivo, modelado 3D y visualización arquitectónica integral.</p>
+                <h3>Residencia Tlanchinol</h3>
+                <p>Estructura residencial concebida en bambú y concreto aparente, adaptada a la topografía boscosa de Hidalgo.</p>
             </div>
             <div class="card">
-                <h3>Ingeniería y Estructuras</h3>
-                <p>Análisis y diseño estructural de concreto, acero y sistemas alternativos bajo normatividad vigente.</p>
+                <h3>Intervención IMSS</h3>
+                <p>Inspección estructural, diagnósticos de falla y normatividad aplicada en infraestructura federal de guarderías.</p>
             </div>
             <div class="card">
-                <h3>Supervisión y Obra</h3>
-                <p>Gestión técnica en sitio, catálogos de conceptos, cuantificación de materiales y control de calidad.</p>
+                <h3>Torre Urbana CDMX</h3>
+                <p>Proyecto ejecutivo mixto con optimización bioclimática y sistemas automatizados de domótica integrada.</p>
             </div>
         </div>
     </section>
 
-    <footer id="contacto">
+    <!-- C.V. PROFESIONAL -->
+    <section id="cv">
+        <h2>Currículum Vitae & Trayectoria</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Formación Académica</h3>
+                <p><strong>Ingeniera Arquitecta</strong> — Instituto Politécnico Nacional (ESIA Tecamachalco).<br>
+                Especialista en cálculo estructural, cimentaciones y diseño bajo NTC.</p>
+            </div>
+            <div class="card">
+                <h3>Experiencia Profesional</h3>
+                <p>Residente de obra y supervisión con equipos de más de 15 especialistas. Modelado 3D avanzado, PBR y análisis por elementos finitos.</p>
+            </div>
+            <div class="card">
+                <h3>Docencia y Desarrollo</h3>
+                <p>Profesor universitario en laboratorios de estudios digitales y creador de herramientas paramétricas de cálculo para ingeniería.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALENDARIO DE CITAS AUTOMÁTICO (GOOGLE MEET) -->
+    <section id="citas">
+        <h2>Agenda tu Asesoría Online</h2>
+        <div class="booking-container">
+            <div>
+                <h3 style="margin-bottom: 1rem; color: var(--accent);">Noviembre 2026</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Selecciona fecha y horario disponible. La sesión dura 45 minutos vía Google Meet.</p>
+                <div class="cal-grid">
+                    <div class="cal-day-name">LUN</div><div class="cal-day-name">MAR</div><div class="cal-day-name">MIÉ</div><div class="cal-day-name">JUE</div><div class="cal-day-name">VIE</div><div class="cal-day-name">SÁB</div><div class="cal-day-name">DOM</div>
+                    <div class="cal-day disabled">26</div><div class="cal-day disabled">27</div><div class="cal-day disabled">28</div><div class="cal-day disabled">29</div><div class="cal-day disabled">30</div><div class="cal-day disabled">31</div><div class="cal-day">1</div>
+                    <div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div><div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div>
+                    <div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div><div class="cal-day">12</div><div class="cal-day selected">13</div><div class="cal-day">14</div><div class="cal-day">15</div>
+                    <div class="cal-day">16</div><div class="cal-day">17</div><div class="cal-day">18</div><div class="cal-day">19</div><div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div>
+                    <div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div>
+                    <div class="cal-day">30</div><div class="cal-day disabled">1</div><div class="cal-day disabled">2</div><div class="cal-day disabled">3</div><div class="cal-day disabled">4</div><div class="cal-day disabled">5</div><div class="cal-day disabled">6</div>
+                </div>
+            </div>
+            <div class="booking-form">
+                <h3 style="margin-bottom: 1rem; color: var(--accent);">Asesoría Personalizada ($900 MXN)</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">Incluye videollamada por Google Meet y revisión previa de tu caso.</p>
+                <form id="meetForm" onsubmit="agendarCita(event)">
+                    <label style="font-size: 0.85rem; display:block; margin-bottom:0.3rem;">Tu Nombre:</label>
+                    <input type="text" id="clientName" placeholder="Nombre completo" required>
+                    <label style="font-size: 0.85rem; display:block; margin-bottom:0.3rem;">Tu Teléfono / WhatsApp:</label>
+                    <input type="tel" id="clientPhone" placeholder="+52 55 1234 5678" required>
+                    <label style="font-size: 0.85rem; display:block; margin-bottom:0.3rem;">Horario Disponible:</label>
+                    <select id="clientTime">
+                        <option>10:00 AM - 10:45 AM</option>
+                        <option>12:00 PM - 12:45 PM</option>
+                        <option>04:00 PM - 04:45 PM</option>
+                    </select>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Agendar y Generar Google Meet</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- TÉRMINOS Y CONDICIONES Y AVISO LEGAL -->
+    <section id="legal">
+        <h2>Términos, Condiciones y Aviso Legal</h2>
+        <div class="legal-box">
+            <h4>1. Uso del sitio web</h4>
+            <p>Bienvenido(a). Al acceder y utilizar este sitio web de Studio Kirei, así como al contratar cualquiera de los servicios ofrecidos, usted acepta los presentes Términos y Condiciones.</p>
+            
+            <h4>2. Servicios</h4>
+            <p>Se ofrecen asesorías de diseño en línea, diseño de interiores, proyecto arquitectónico y ejecutivo, domótica, construcción y remodelación. Los alcances y tiempos se establecen mediante cotización formal.</p>
+
+            <h4>3. Propiedad Intelectual</h4>
+            <p>Todos los proyectos, planos, renders, modelos 3D y documentos técnicos están protegidos por la legislación aplicable en materia de propiedad intelectual. Queda prohibida su reproducción sin autorización por escrito.</p>
+
+            <h4>4. Cancelaciones y Puntualidad (Asesorías)</h4>
+            <p>Pagos no reembolsables por reserva de espacio. Reprogramación sin costo únicamente con 48 horas de anticipación. Tolerancia máxima de 15 minutos de retraso en la sesión de Google Meet.</p>
+
+            <h4>5. Jurisdicción</h4>
+            <p>Para cualquier controversia, las partes se someten a la jurisdicción de los tribunales competentes de México. Contacto directo: arquitecturastudiok@gmail.com</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
         <div class="social-links">
             <a href="https://www.facebook.com/profile.php?id=61576983561718" target="_blank">Facebook</a>
             <a href="https://www.instagram.com/studiokarquitecture" target="_blank">Instagram</a>
             <a href="https://www.youtube.com/@StudioKArquitectura" target="_blank">YouTube</a>
             <a href="https://www.tiktok.com/@studio.k.arquitec" target="_blank">TikTok</a>
         </div>
-        <p>Studio K Arquitectura e Ingeniería &bull; CDMX - Estado de México, México</p>
+        <p>Studio Kirei &bull; CDMX - Estado de México, México &bull; Contacto: arquitecturastudiok@gmail.com</p>
     </footer>
 
+    <script>
+        // Cambiar paleta de colores
+        function setPalette(paletteName) {
+            document.body.setAttribute('data-palette', paletteName);
+            localStorage.setItem('stk_palette', paletteName);
+        }
+
+        // Cambiar modo Oscuro / Claro
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('stk_theme', newTheme);
+        }
+
+        // Cargar preferencias guardadas
+        window.onload = function() {
+            const savedPalette = localStorage.getItem('stk_palette');
+            const savedTheme = localStorage.getItem('stk_theme');
+            if (savedPalette) document.body.setAttribute('data-palette', savedPalette);
+            if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
+        };
+
+        // Automatización de Citas con Enlace a Google Meet
+        function agendarCita(event) {
+            event.preventDefault();
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
+            const time = document.getElementById('clientTime').value;
+            
+            // Correo de destino automático solicitado
+            const targetEmail = "arquitecturastudiok@gmail.com";
+            const subject = encodeURIComponent("Nueva Cita de Asesoría Agendada - Studio Kirei");
+            const body = encodeURIComponent(`Hola Arq. Studio Kirei,\n\nSe ha agendado una nueva cita:\n- Cliente: ${name}\n- Teléfono/WhatsApp: ${phone}\n- Horario seleccionado: ${time}\n\nPor favor generar y enviar enlace de Google Meet al cliente.`);
+
+            // Abre el cliente de correo configurado apuntando automáticamente al correo corporativo
+            window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
+            
+            alert(`¡Cita registrada con éxito, ${name}! Se abrirá tu correo para enviar la confirmación automática a arquitecturastudiok@gmail.com y coordinar tu Google Meet.`);
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio K Arquitectura e Ingeniería</title>
+    <style>
+        :root {
+            --bg-color: #F4F3EF;
+            --text-main: #1C1C1A;
+            --text-muted: #5C5B57;
+            --accent: #6B7028;
+            --border-color: #DCDAD3;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+        header {
+            padding: 2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        nav a {
+            margin-left: 2rem;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        nav a:hover {
+            color: var(--accent);
+        }
+        .hero {
+            padding: 6rem 5%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+        }
+        .philosophy-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+        section {
+            padding: 4rem 5%;
+            max-width: 1100px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-color);
+        }
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .card {
+            background: #FFFFFF;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+        }
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .social-links {
+            margin-bottom: 1rem;
+        }
+        .social-links a {
+            margin: 0 1rem;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .social-links a:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Studio K</div>
+        <nav>
+            <a href="#filosofia">Filosofía</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#contacto">Contacto</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <span class="philosophy-tag">Materialismo Dialéctico &bull; Wabi-Sabi</span>
+        <h1>Arquitectura e Ingeniería que transforman las condiciones materiales.</h1>
+        <p>En Studio K concebimos el espacio desde el rigor estructural y la honestidad de los materiales. «Lo de afuera está adentro»: diseñamos obras funcionales, resilientes y profundamente humanas.</p>
+    </div>
+
+    <section id="filosofia">
+        <h2>Enfoque y Metodología</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Materialismo Dialéctico</h3>
+                <p>Entendemos la arquitectura como una herramienta de transformación real del entorno físico y social, respondiendo con precisión técnica a las necesidades concretas de cada sitio.</p>
+            </div>
+            <div class="card">
+                <h3>Estética Wabi-Sabi</h3>
+                <p>Valoramos la belleza de lo auténtico, la textura natural de los materiales sin artificios y la dignidad con la que las estructuras envejecen junto a quienes las habitan.</p>
+            </div>
+            <div class="card">
+                <h3>Rigor Estructural</h3>
+                <p>Integración total entre el diseño arquitectónico y el cálculo de ingeniería, garantizando seguridad normativa, eficiencia constructiva y optimización de recursos.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="servicios">
+        <h2>Áreas de Práctica</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Proyecto Arquitectónico</h3>
+                <p>Diseño conceptual, desarrollo ejecutivo, modelado 3D y visualización arquitectónica integral.</p>
+            </div>
+            <div class="card">
+                <h3>Ingeniería y Estructuras</h3>
+                <p>Análisis y diseño estructural de concreto, acero y sistemas alternativos bajo normatividad vigente.</p>
+            </div>
+            <div class="card">
+                <h3>Supervisión y Obra</h3>
+                <p>Gestión técnica en sitio, catálogos de conceptos, cuantificación de materiales y control de calidad.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contacto">
+        <div class="social-links">
+            <a href="https://www.facebook.com/profile.php?id=61576983561718" target="_blank">Facebook</a>
+            <a href="https://www.instagram.com/studiokarquitecture" target="_blank">Instagram</a>
+            <a href="https://www.youtube.com/@StudioKArquitectura" target="_blank">YouTube</a>
+            <a href="https://www.tiktok.com/@studio.k.arquitec" target="_blank">TikTok</a>
+        </div>
+        <p>Studio K Arquitectura e Ingeniería &bull; CDMX - Estado de México, México</p>
+    </footer>
+
+</body>
+</html>

@@ -222,7 +222,7 @@
             background-color: var(--accent-hover);
         }
 
-        /* ESTADÍSTICAS / CONTADOR DE PROYECTOS */
+        /* ESTADÍSTICAS / CONTADOR DINÁMICO */
         .stats-section {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
@@ -449,23 +449,23 @@
         </div>
     </section>
 
-    <!-- ESTADÍSTICAS / CONTADOR AUTOMATIZADO -->
+    <!-- ESTADÍSTICAS / CONTADOR DINÁMICO ANIMADO -->
     <div class="stats-section">
         <div class="stats-grid">
             <div class="stat-box">
-                <h3 id="counter-clients">+200</h3>
+                <h3 class="counter" data-target="200" data-plus="true">0</h3>
                 <p>Clientes Satisfechos</p>
             </div>
             <div class="stat-box">
-                <h3 id="counter-exp">15</h3>
+                <h3 class="counter" data-target="15" data-plus="false">0</h3>
                 <p>Años de Experiencia</p>
             </div>
             <div class="stat-box">
-                <h3 id="counter-projects">+200</h3>
+                <h3 class="counter" data-target="200" data-plus="true">0</h3>
                 <p>Proyectos Arquitectónicos</p>
             </div>
             <div class="stat-box">
-                <h3 id="counter-states">7</h3>
+                <h3 class="counter" data-target="7" data-plus="false">0</h3>
                 <p>Estados con Presencia</p>
             </div>
         </div>
@@ -619,7 +619,31 @@
             const savedTheme = localStorage.getItem('stk_theme');
             if (savedPalette) document.body.setAttribute('data-palette', savedPalette);
             if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
+            
+            // Iniciar animación de contadores
+            startCounters();
         };
+
+        // Animación dinámica tipo conteo (incremento fluido)
+        function startCounters() {
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const hasPlus = counter.getAttribute('data-plus') === 'true';
+                let current = 0;
+                const increment = target / 50; // Velocidad de conteo
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.innerText = (hasPlus ? "+" : "") + Math.ceil(current);
+                        setTimeout(updateCounter, 30);
+                    } else {
+                        counter.innerText = (hasPlus ? "+" : "") + target;
+                    }
+                };
+                updateCounter();
+            });
+        }
 
         // Automatización de Citas con Enlace a Google Meet
         function agendarCita(event) {
@@ -628,12 +652,10 @@
             const phone = document.getElementById('clientPhone').value;
             const time = document.getElementById('clientTime').value;
             
-            // Correo de destino automático solicitado
             const targetEmail = "arquitecturastudiok@gmail.com";
             const subject = encodeURIComponent("Nueva Cita de Asesoría Agendada - Studio Kirei");
             const body = encodeURIComponent(`Hola Arq. Studio Kirei,\n\nSe ha agendado una nueva cita:\n- Cliente: ${name}\n- Teléfono/WhatsApp: ${phone}\n- Horario seleccionado: ${time}\n\nPor favor generar y enviar enlace de Google Meet al cliente.`);
 
-            // Abre el cliente de correo configurado apuntando automáticamente al correo corporativo
             window.location.href = `mailto:${targetEmail}?subject=${subject}&body=${body}`;
             
             alert(`¡Cita registrada con éxito, ${name}! Se abrirá tu correo para enviar la confirmación automática a arquitecturastudiok@gmail.com y coordinar tu Google Meet.`);

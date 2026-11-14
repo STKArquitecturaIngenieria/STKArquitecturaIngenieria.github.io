@@ -77,7 +77,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -88,7 +92,7 @@
             overflow-x: hidden;
         }
 
-        /* BARRA SUPERIOR Y NAVEGACIÓN */
+        /* NAVEGACIÓN ADAPTATIVA (PC, TABLET, CELULAR) */
         header {
             position: fixed;
             top: 0;
@@ -96,7 +100,7 @@
             width: 100%;
             background: var(--header-bg);
             backdrop-filter: blur(10px);
-            padding: 1.2rem 5%;
+            padding: 1rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -105,7 +109,7 @@
         }
 
         .logo {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -115,13 +119,13 @@
         nav {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.2rem;
         }
 
         nav a {
             text-decoration: none;
             color: var(--text-main);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 500;
@@ -134,18 +138,18 @@
         .controls-bar {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            margin-left: 1rem;
+            gap: 0.6rem;
+            margin-left: 0.8rem;
             border-left: 1px solid var(--border-color);
-            padding-left: 1rem;
+            padding-left: 0.8rem;
         }
 
         .theme-btn, .palette-dot {
             background: none;
             border: 1px solid var(--border-color);
             cursor: pointer;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
             color: var(--text-main);
             border-radius: 4px;
         }
@@ -157,20 +161,20 @@
 
         .palette-selector {
             display: flex;
-            gap: 0.3rem;
+            gap: 0.25rem;
         }
 
         .palette-dot {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             padding: 0;
             border: 2px solid var(--border-color);
         }
 
-        /* HERO SECCIÓN */
+        /* HERO SECCIÓN RESPONSIVE */
         .hero {
-            padding: 9rem 5% 5rem;
+            padding: 8rem 5% 4rem;
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
@@ -180,16 +184,16 @@
         }
 
         .hero h1 {
-            font-size: 3.2rem;
+            font-size: clamp(2.2rem, 4vw, 3.2rem);
             font-weight: 300;
             line-height: 1.15;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
         .hero p {
-            font-size: 1.15rem;
+            font-size: clamp(1rem, 2vw, 1.15rem);
             color: var(--text-muted);
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem;
         }
 
         .philosophy-tag {
@@ -197,139 +201,143 @@
             padding: 0.4rem 1rem;
             border: 1px solid var(--accent);
             color: var(--accent);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
         .btn-primary {
             display: inline-block;
             background-color: var(--accent);
             color: #FFFFFF;
-            padding: 0.9rem 2rem;
+            padding: 0.85rem 1.8rem;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             letter-spacing: 1px;
             text-transform: uppercase;
             font-weight: 600;
             border: none;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.2s;
         }
 
         .btn-primary:hover {
             background-color: var(--accent-hover);
+            transform: translateY(-2px);
         }
 
-        /* ESTADÍSTICAS / CONTADOR DINÁMICO */
+        .hero img {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            filter: grayscale(15%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* CONTADOR DINÁMICO TIPO CALCULADORA / ODÓMETRO */
         .stats-section {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
-            padding: 4rem 5%;
+            padding: 3.5rem 5%;
         }
 
         .stats-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 2rem;
             text-align: center;
         }
 
         .stat-box h3 {
-            font-size: 3rem;
+            font-size: clamp(2.2rem, 4vw, 3rem);
             font-weight: 300;
             color: var(--accent);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .stat-box p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         /* SECCIONES GENERALES */
         section {
-            padding: 5rem 5%;
+            padding: 4.5rem 5%;
             max-width: 1200px;
             margin: 0 auto;
             border-bottom: 1px solid var(--border-color);
         }
 
         h2 {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 3vw, 2.2rem);
             font-weight: 300;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             letter-spacing: 1px;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
         }
 
         .card {
             background: var(--card-bg);
-            padding: 2.5rem;
+            padding: 2rem;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.06);
         }
 
         .card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+            font-size: 1.15rem;
+            margin-bottom: 0.8rem;
             color: var(--accent);
             font-weight: 500;
         }
 
         .card p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
-        /* CALENDARIO DE CITAS AUTOMÁTICO (MEET) */
+        /* CALENDARIO DE CITAS AUTOMÁTICO (MEET) RESPONSIVE */
         .booking-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 3rem;
+            gap: 2.5rem;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 3rem;
-        }
-
-        .calendar-box header {
-            position: static;
-            background: none;
-            border: none;
-            padding: 0;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
+            padding: 2.5rem;
         }
 
         .cal-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 4px;
             text-align: center;
         }
 
         .cal-day-name {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
             color: var(--text-muted);
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
         }
 
         .cal-day {
-            padding: 0.8rem 0;
-            font-size: 0.9rem;
+            padding: 0.7rem 0;
+            font-size: 0.85rem;
             border: 1px solid var(--border-color);
             cursor: pointer;
             background: var(--bg-color);
@@ -348,45 +356,46 @@
 
         .booking-form input, .booking-form select {
             width: 100%;
-            padding: 0.9rem;
-            margin-bottom: 1rem;
+            padding: 0.85rem;
+            margin-bottom: 0.9rem;
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         /* TÉRMINOS Y CONDICIONES */
         .legal-box {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 3rem;
-            max-height: 450px;
+            padding: 2.5rem;
+            max-height: 400px;
             overflow-y: auto;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
         .legal-box h4 {
             color: var(--text-main);
-            margin: 1.5rem 0 0.5rem;
+            margin: 1.2rem 0 0.4rem;
         }
 
         /* FOOTER */
         footer {
-            padding: 4rem 5%;
+            padding: 3.5rem 5%;
             text-align: center;
             border-top: 1px solid var(--border-color);
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background: var(--card-bg);
         }
 
         .social-links {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 1.5rem;
+            flex-wrap: wrap;
         }
 
         .social-links a {
@@ -394,7 +403,7 @@
             text-decoration: none;
             font-weight: 500;
             text-transform: uppercase;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             letter-spacing: 1px;
         }
 
@@ -402,12 +411,18 @@
             color: var(--accent);
         }
 
+        /* ADAPTABILIDAD MÓVIL Y TABLET */
         @media(max-width: 900px) {
-            .hero, .booking-container {
+            .hero {
                 grid-template-columns: 1fr;
+                padding-top: 7rem;
+            }
+            .booking-container {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
             }
             nav {
-                display: none;
+                display: none; /* Menú colapsable simplificado para móvil */
             }
         }
     </style>
@@ -427,10 +442,10 @@
         </nav>
         <div class="controls-bar">
             <div class="palette-selector">
-                <button class="palette-dot" style="background:#54582f;" onclick="setPalette('wabi')" title="Wabi-Sabi / Tierra"></button>
-                <button class="palette-dot" style="background:#0284c7;" onclick="setPalette('ocean')" title="Océano Profundo"></button>
+                <button class="palette-dot" style="background:#54582f;" onclick="setPalette('wabi')" title="Wabi-Sabi"></button>
+                <button class="palette-dot" style="background:#0284c7;" onclick="setPalette('ocean')" title="Océano"></button>
                 <button class="palette-dot" style="background:#c05621;" onclick="setPalette('rose')" title="Rosa & Oro"></button>
-                <button class="palette-dot" style="background:#9b1c1c;" onclick="setPalette('carmine')" title="Rojo Carmín"></button>
+                <button class="palette-dot" style="background:#9b1c1c;" onclick="setPalette('carmine')" title="Carmín"></button>
             </div>
             <button class="theme-btn" onclick="toggleTheme()" id="themeToggle">🌙 / ☀️</button>
         </div>
@@ -445,27 +460,31 @@
             <a href="#citas" class="btn-primary">Agendar Asesoría Online</a>
         </div>
         <div>
-            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Arquitectura Studio Kirei" style="width:100%; border:1px solid var(--border-color); filter: grayscale(20%);">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Arquitectura Studio Kirei">
         </div>
     </section>
 
-    <!-- ESTADÍSTICAS / CONTADOR DINÁMICO ANIMADO -->
+    <!-- ESTADÍSTICAS / CONTADOR DINÁMICO TIPO CALCULADORA -->
     <div class="stats-section">
         <div class="stats-grid">
             <div class="stat-box">
-                <h3 class="counter" data-target="200" data-plus="true">0</h3>
+                <h3 class="counter" data-target="200" data-plus="true" data-suffix="">0</h3>
                 <p>Clientes Satisfechos</p>
             </div>
             <div class="stat-box">
-                <h3 class="counter" data-target="15" data-plus="false">0</h3>
+                <h3 class="counter" data-target="15" data-plus="false" data-suffix="">0</h3>
                 <p>Años de Experiencia</p>
             </div>
             <div class="stat-box">
-                <h3 class="counter" data-target="200" data-plus="true">0</h3>
+                <h3 class="counter" data-target="25000" data-plus="true" data-suffix=" m²">0</h3>
+                <p>M² de Proyectos Trabajados</p>
+            </div>
+            <div class="stat-box">
+                <h3 class="counter" data-target="200" data-plus="true" data-suffix="">0</h3>
                 <p>Proyectos Arquitectónicos</p>
             </div>
             <div class="stat-box">
-                <h3 class="counter" data-target="7" data-plus="false">0</h3>
+                <h3 class="counter" data-target="7" data-plus="false" data-suffix="">0</h3>
                 <p>Estados con Presencia</p>
             </div>
         </div>
@@ -613,32 +632,37 @@
             localStorage.setItem('stk_theme', newTheme);
         }
 
-        // Cargar preferencias guardadas
+        // Cargar preferencias guardadas y activar contadores
         window.onload = function() {
             const savedPalette = localStorage.getItem('stk_palette');
             const savedTheme = localStorage.getItem('stk_theme');
             if (savedPalette) document.body.setAttribute('data-palette', savedPalette);
             if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
             
-            // Iniciar animación de contadores
-            startCounters();
+            startCalculatedCounters();
         };
 
-        // Animación dinámica tipo conteo (incremento fluido)
-        function startCounters() {
+        // Animación de conteo dinámico estilo calculadora / odómetro
+        function startCalculatedCounters() {
             const counters = document.querySelectorAll('.counter');
             counters.forEach(counter => {
                 const target = +counter.getAttribute('data-target');
                 const hasPlus = counter.getAttribute('data-plus') === 'true';
+                const suffix = counter.getAttribute('data-suffix') || '';
                 let current = 0;
-                const increment = target / 50; // Velocidad de conteo
+                const steps = 60; // Fluidez de la animación
+                const increment = target / steps;
+                const speed = 25; // Milisegundos por paso
+
                 const updateCounter = () => {
                     current += increment;
                     if (current < target) {
-                        counter.innerText = (hasPlus ? "+" : "") + Math.ceil(current);
-                        setTimeout(updateCounter, 30);
+                        let formattedNum = Math.ceil(current).toLocaleString();
+                        counter.innerText = (hasPlus ? "+" : "") + formattedNum + suffix;
+                        setTimeout(updateCounter, speed);
                     } else {
-                        counter.innerText = (hasPlus ? "+" : "") + target;
+                        let formattedTarget = target.toLocaleString();
+                        counter.innerText = (hasPlus ? "+" : "") + formattedTarget + suffix;
                     }
                 };
                 updateCounter();

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STK Studio | Ingeniería y Arquitectura — Ing. Arq. Agustín Patraca H.</title>
-  <meta name="description" content="Despacho integral de Ingeniería y Arquitectura dirigido por el Ing. Arq. Agustín Patraca Hernández (IPN ESIA Tecamachalco). Proyectos ejecutivos, cálculo estructural NTC, gestoría D.R.O., topografía UTM, trámites RAN, STPS, CONAGUA y supervisión de obra." />
+  <meta name="description" content="Despacho integral de Ingeniería y Arquitectura dirigido por el Ing. Arq. Agustín Patraca Hernández (IPN ESIA Tecamachalco). Proyectos ejecutivos, cálculo estructural NTC, gestoría D.R.O., topografía UTM, trámites RAN, STPS, CONAGUA, supervisión de obra y cotizador interactivo." />
   
-  <!-- Google Fonts: Cormorant Garamond & Plus Jakarta Sans -->
+  <!-- Google Fonts: Cormorant Garamond, Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +44,8 @@
           },
           fontFamily: {
             serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
@@ -75,16 +76,65 @@
       opacity: 1;
       transform: translateY(0);
     }
+    /* Checkbox personalizado STK */
+    .stk-checkbox {
+      appearance: none;
+      width: 17px;
+      height: 17px;
+      border: 1.5px solid #2D6A4F;
+      border-radius: 4px;
+      background-color: #FFFFFF;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .stk-checkbox:checked {
+      background-color: #1B4332;
+      border-color: #1B4332;
+    }
+    .stk-checkbox:checked::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background-color: white;
+      clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    }
+    /* Scrollbar del acordeón */
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #F1F5F3; border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #8DA393; border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #1B4332; }
+
+    /* Estilos de impresión / PDF formal */
+    @media print {
+      body * { visibility: hidden; }
+      #print-modal, #print-modal * { visibility: visible; }
+      #print-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print { display: none !important; }
+    }
   </style>
 </head>
 <body class="bg-stonewarm-50 text-charcoal font-sans antialiased selection:bg-forest-800 selection:text-white overflow-x-hidden">
 
+  <!-- Contenedor de Notificaciones Toast -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
   <!-- Barra de Navegación Fija -->
-  <header id="navbar" class="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-stonewarm-50/90 backdrop-blur-md border-b border-forest-800/10">
+  <header id="navbar" class="fixed top-0 inset-x-0 z-40 transition-all duration-300 bg-stonewarm-50/90 backdrop-blur-md border-b border-forest-800/10 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-20">
-        <!-- Logotipo Geométrico / Tipográfico -->
-        <a href="#inicio" class="flex items-center gap-3 group">
+        <!-- Logotipo Geométrico / Tipográfico (Triple click para acceso admin) -->
+        <a href="#inicio" id="brand-logo" onclick="handleLogoClick(event)" class="flex items-center gap-3 group select-none">
           <div class="w-11 h-11 rounded-xl bg-forest-800 text-white flex items-center justify-center shadow-md group-hover:bg-forest-700 transition-colors relative overflow-hidden">
             <svg class="w-7 h-7" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 28V12L18 6L30 12V28" stroke="#C5A059" stroke-width="2" stroke-linecap="square"/>
@@ -98,22 +148,23 @@
           </div>
         </a>
 
-        <!-- Enlaces Desktop -->
+        <!-- Enlaces Desktop (Pestaña Vista Arquitecto OCULTA para Clientes) -->
         <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-charcoal/85">
           <a href="#inicio" class="hover:text-forest-800 transition-colors">Inicio</a>
           <a href="#servicios" class="hover:text-forest-800 transition-colors">Servicios</a>
+          <a href="#agendar" class="hover:text-forest-800 transition-colors font-semibold text-bronze-600">Agendar Asesoría</a>
           <a href="#trayectoria" class="hover:text-forest-800 transition-colors">Trayectoria y Proyectos</a>
-          <a href="#cotizador" class="hover:text-forest-800 transition-colors">Cotizador Interactivo</a>
+          <a href="#cotizador" class="hover:text-forest-800 transition-colors font-semibold text-forest-800">Cotizador Punto x Punto</a>
           <a href="#contacto" class="hover:text-forest-800 transition-colors">Contacto</a>
         </nav>
 
         <!-- Botones Rápidos Header -->
         <div class="hidden sm:flex items-center gap-3">
           <a href="#cotizador" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-forest-800 border border-forest-800/25 hover:bg-forest-100 transition-all">
-            Estimar Proyecto
+            Cotizar Proyecto
           </a>
-          <a href="#contacto" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-forest-800 text-white hover:bg-forest-700 shadow-sm transition-all flex items-center gap-2">
-            <span>Agendar Consulta</span>
+          <a href="#agendar" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-forest-800 text-white hover:bg-forest-700 shadow-sm transition-all flex items-center gap-2">
+            <span>Agendar Asesoría</span>
             <i data-lucide="arrow-up-right" class="w-4 h-4 text-bronze-400"></i>
           </a>
         </div>
@@ -129,8 +180,9 @@
     <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-forest-800/10 px-4 pt-2 pb-6 space-y-2 shadow-xl">
       <a href="#inicio" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Inicio</a>
       <a href="#servicios" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Servicios Integrales</a>
+      <a href="#agendar" class="mobile-link block px-4 py-3 rounded-xl font-bold hover:bg-forest-50 text-bronze-600">Agendar Asesoría</a>
       <a href="#trayectoria" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Trayectoria y Proyectos</a>
-      <a href="#cotizador" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Cotizador Interactivo</a>
+      <a href="#cotizador" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Cotizador Punto por Punto</a>
       <a href="#contacto" class="mobile-link block px-4 py-3 rounded-xl font-medium hover:bg-forest-50 text-forest-900">Contacto y Citas</a>
       <div class="pt-3 flex flex-col gap-2">
         <a href="https://wa.me/525638006027?text=Hola%20Ing.%20Arq.%20Agust%C3%ADn%20Patraca,%20me%20interesa%20una%20asesor%C3%ADa%20con%20STK%20Studio." target="_blank" rel="noopener noreferrer" class="w-full py-3 rounded-xl bg-forest-800 text-white text-center font-semibold flex items-center justify-center gap-2">
@@ -141,8 +193,7 @@
   </header>
 
   <!-- Hero Section -->
-  <section id="inicio" class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 arch-grid overflow-hidden">
-    <!-- Acentos decorativos sutiles -->
+  <section id="inicio" class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 arch-grid overflow-hidden no-print">
     <div class="absolute top-24 right-0 w-96 h-96 bg-forest-700/10 rounded-full blur-3xl -z-10"></div>
     <div class="absolute bottom-0 left-0 w-80 h-80 bg-bronze-400/10 rounded-full blur-3xl -z-10"></div>
 
@@ -165,13 +216,13 @@
 
           <!-- Botones de Acción (CTA) -->
           <div class="flex flex-wrap items-center gap-4 pt-2">
-            <a href="#contacto" class="px-7 py-4 rounded-2xl bg-forest-800 hover:bg-forest-700 text-white font-semibold shadow-lg shadow-forest-900/15 transition-all flex items-center gap-2.5">
-              <i data-lucide="calendar-check" class="w-5 h-5 text-bronze-400"></i>
-              <span>Agendar Consulta</span>
+            <a href="#agendar" class="px-7 py-4 rounded-2xl bg-forest-800 hover:bg-forest-700 text-white font-semibold shadow-lg shadow-forest-900/15 transition-all flex items-center gap-2.5">
+              <i data-lucide="calendar" class="w-5 h-5 text-bronze-400"></i>
+              <span>Agendar Asesoría ($900 MXN)</span>
             </a>
             <a href="#cotizador" class="px-7 py-4 rounded-2xl bg-white hover:bg-forest-50 text-forest-900 border border-forest-800/20 font-semibold shadow-sm transition-all flex items-center gap-2.5">
               <i data-lucide="calculator" class="w-5 h-5 text-forest-700"></i>
-              <span>Cotizar Proyecto</span>
+              <span>Cotizar Punto por Punto</span>
             </a>
           </div>
 
@@ -266,8 +317,129 @@
     </div>
   </section>
 
+  <!-- =========================================================================
+       NUEVA SECCIÓN: AGENDAR ASESORÍA ONLINE PERSONALIZADA
+       ========================================================================= -->
+  <section id="agendar" class="py-20 lg:py-28 bg-stonewarm-100 border-y border-forest-800/10 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-12 reveal">
+        <span class="text-xs uppercase tracking-[0.22em] text-bronze-600 font-bold">Reserva Automática de Citas</span>
+        <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-forest-900 mt-2">Elige tu fecha y horario</h2>
+        <p class="text-charcoal/75 mt-3 text-base sm:text-lg">
+          Selecciona el momento que mejor se adapte a tu agenda. La sesión dura <strong class="text-forest-900 font-bold">45 minutos</strong>.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
+        
+        <!-- Columna Calendario de Selección -->
+        <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-forest-800/12 space-y-6 reveal">
+          <div class="flex items-center justify-between border-b border-forest-800/10 pb-4">
+            <button onclick="changeMonth(-1)" class="p-2 rounded-xl border border-forest-800/15 hover:bg-forest-50 text-forest-900 transition-colors">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <h3 id="calendar-month-year" class="font-serif text-2xl font-bold text-forest-900">Noviembre 2026</h3>
+            <button onclick="changeMonth(1)" class="p-2 rounded-xl border border-forest-800/15 hover:bg-forest-50 text-forest-900 transition-colors">
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+          </div>
+
+          <!-- Nombres de Días -->
+          <div class="grid grid-cols-7 text-center text-xs font-bold text-forest-700 uppercase tracking-wider">
+            <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+          </div>
+
+          <!-- Grid de Días -->
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-2 text-center text-sm">
+            <!-- Renderizado dinámicamente -->
+          </div>
+
+          <!-- Horarios Disponibles -->
+          <div class="pt-4 border-t border-forest-800/10">
+            <span class="block text-xs font-bold uppercase tracking-widest text-forest-700 mb-3">HORARIOS DISPONIBLES</span>
+            <div id="time-slots-container" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 text-xs font-semibold">
+              <!-- Renderizado dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Detalle de Servicio y Confirmación -->
+        <div class="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-forest-800/12 space-y-6 reveal">
+          <div>
+            <div class="flex items-baseline justify-between">
+              <h3 class="font-bold text-xl text-forest-900">Asesoría online personalizada</h3>
+              <div>
+                <span class="font-serif text-3xl font-bold text-forest-900">$900</span>
+                <span class="text-xs font-semibold text-charcoal/60">MXN</span>
+              </div>
+            </div>
+            <p class="text-xs text-forest-700 font-semibold mt-1 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3.5 h-3.5"></i> 45 minutos
+            </p>
+          </div>
+
+          <div class="space-y-2.5 text-xs text-charcoal/85 border-y border-forest-800/10 py-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-forest-700 shrink-0"></i>
+              <span>Videollamada 1 a 1 directa con Ing. Arq. Agustín Patraca</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-forest-700 shrink-0"></i>
+              <span>Resolución de dudas puntuales de tu proyecto</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-forest-700 shrink-0"></i>
+              <span>Revisión previa de tu caso y normatividad</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-forest-700 shrink-0"></i>
+              <span>Siguientes pasos recomendados e ingeniería de costos</span>
+            </div>
+          </div>
+
+          <!-- Selección Actual -->
+          <div id="selected-datetime-banner" class="p-3.5 rounded-xl bg-forest-50 border border-forest-800/15 text-xs text-forest-900 font-medium text-center">
+            Aún no has elegido fecha y hora
+          </div>
+
+          <!-- Formulario de Datos del Cliente para la Cita -->
+          <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="space-y-4">
+            <div>
+              <label for="booking-name" class="block text-xs font-bold uppercase tracking-wider text-forest-900 mb-1">Nombre Completo *</label>
+              <input type="text" id="booking-name" required placeholder="Ej. Roberto Gómez" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stonewarm-50 border border-forest-800/20 focus:outline-none focus:ring-2 focus:ring-forest-700" />
+            </div>
+
+            <div>
+              <label for="booking-phone" class="block text-xs font-bold uppercase tracking-wider text-forest-900 mb-1">WhatsApp / Teléfono *</label>
+              <input type="tel" id="booking-phone" required placeholder="Ej. 55 1234 5678" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stonewarm-50 border border-forest-800/20 focus:outline-none focus:ring-2 focus:ring-forest-700" />
+            </div>
+
+            <div>
+              <label for="booking-email" class="block text-xs font-bold uppercase tracking-wider text-forest-900 mb-1">Correo Gmail del Cliente *</label>
+              <input type="email" id="booking-email" required placeholder="cliente@gmail.com" class="w-full px-3.5 py-2.5 text-xs rounded-xl bg-stonewarm-50 border border-forest-800/20 focus:outline-none focus:ring-2 focus:ring-forest-700" />
+            </div>
+
+            <label class="flex items-start gap-2.5 cursor-pointer text-xs text-charcoal/80 pt-1">
+              <input type="checkbox" id="booking-terms" required class="stk-checkbox mt-0.5" />
+              <span>Acepto los <a href="#contacto" class="underline font-semibold text-forest-800">términos y condiciones</a> del servicio.</span>
+            </label>
+
+            <button type="submit" class="w-full py-4 rounded-xl bg-forest-900 hover:bg-forest-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2">
+              <span>AGENDAR Y CONFIRMAR →</span>
+            </button>
+          </form>
+
+          <p class="text-[11px] text-center text-charcoal/60">
+            Los horarios mostrados corresponden a la zona horaria de CDMX (GMT-6).
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- Catálogo Integral de Servicios -->
-  <section id="servicios" class="py-20 lg:py-28 bg-white border-y border-forest-800/10">
+  <section id="servicios" class="py-20 lg:py-28 bg-white border-y border-forest-800/10 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl mx-auto text-center mb-14 reveal">
         <span class="text-xs uppercase tracking-[0.22em] text-bronze-600 font-bold">Especialidades Técnicas</span>
@@ -452,7 +624,7 @@
   </section>
 
   <!-- Portafolio de Experiencia y Proyectos Destacados -->
-  <section id="trayectoria" class="py-20 lg:py-28 arch-grid">
+  <section id="trayectoria" class="py-20 lg:py-28 arch-grid no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row lg:items-end justify-between mb-14 gap-6 reveal">
         <div class="max-w-2xl">
@@ -605,118 +777,354 @@
     </div>
   </section>
 
-  <!-- Calculadora / Estimador Interactivo de Honorarios -->
-  <section id="cotizador" class="py-20 lg:py-28 bg-forest-900 text-white arch-grid-dark relative">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto text-center mb-12 reveal">
-        <span class="text-xs uppercase tracking-[0.22em] text-bronze-400 font-bold">Herramienta de Planeación</span>
-        <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mt-2">Estimador Interactivo de Honorarios</h2>
-        <p class="text-white/75 mt-3 text-base">
-          Calcula un presupuesto preliminar en pesos mexicanos (MXN) según el tipo de servicio técnico, superficie y complejidad de tu inmueble, y envíalo directamente para formalizar tu cotización.
-        </p>
-      </div>
+  <!-- =========================================================================
+       COTIZADOR INTEGRADO PUNTO POR PUNTO (STK STUDIO / STUDIO KIREI)
+       ========================================================================= -->
+  <section id="cotizador" class="py-20 lg:py-28 bg-forest-900 text-white arch-grid-dark relative no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div class="bg-white text-charcoal rounded-3xl p-6 sm:p-10 shadow-2xl grid lg:grid-cols-12 gap-8 items-center reveal">
-        <!-- Controles del Cotizador -->
-        <div class="lg:col-span-7 space-y-6">
+      <!-- PANEL INTERNO DE CONFIGURACIÓN DE TARIFAS (OCULTO POR DEFECTO) -->
+      <div id="internal-settings-panel" class="hidden mb-10 bg-charcoal text-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-bronze-400/40 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4">
           <div>
-            <label for="calc-service" class="block text-sm font-bold text-forest-900 mb-2">1. Selecciona el Servicio Técnico</label>
-            <select id="calc-service" class="w-full px-4 py-3.5 rounded-xl bg-stonewarm-50 border border-forest-800/20 text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700">
-              <option value="proyecto">Proyecto Arquitectónico y Ejecutivo (Obra Nueva / Ampliación)</option>
-              <option value="estructural">Cálculo Estructural y Planos (Normas NTC 2020–2026)</option>
-              <option value="topografia">Levantamiento Topográfico UTM / Agrimensura / Trámite RAN</option>
-              <option value="regularizacion">Regularización de Inmueble / Dictamen Estructural STPS / D.R.O.</option>
-              <option value="render">Modelado 3D y Renderizado Fotorrealista (Paquete Integral)</option>
-              <option value="supervision">Supervisión y Residencia de Obra / Generadores y Costos</option>
-            </select>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-bronze-400">Administración Interna STK Studio</span>
+            <h3 class="font-serif text-2xl font-bold text-white mt-0.5">Panel de Tarifas, Programas y Base de Datos</h3>
+            <p class="text-xs text-white/70">Ajusta parámetros internos de cálculo, tarifas de construcción y conceptos integrables. Oculto para el cliente final.</p>
           </div>
+          <button type="button" onclick="toggleInternalSettings()" class="text-xs px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition">Cerrar Panel</button>
+        </div>
 
-          <div class="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label for="calc-property" class="block text-sm font-bold text-forest-900 mb-2">2. Tipo de Inmueble</label>
-              <select id="calc-property" class="w-full px-4 py-3.5 rounded-xl bg-stonewarm-50 border border-forest-800/20 text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700">
-                <option value="1.0">Residencial Unifamiliar</option>
-                <option value="1.2">Casa Dúplex / Régimen de Condominio</option>
-                <option value="1.45">Comercial / Oficinas / Nave Industrial</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="calc-sqm" class="block text-sm font-bold text-forest-900 mb-2">3. Superficie Estimada (m²)</label>
-              <div class="relative">
-                <input type="number" id="calc-sqm" min="20" max="50000" value="150" class="w-full px-4 py-3.5 rounded-xl bg-stonewarm-50 border border-forest-800/20 text-charcoal font-bold focus:outline-none focus:ring-2 focus:ring-forest-700" />
-                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-forest-700">m²</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Slider rápido de m2 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
           <div>
-            <div class="flex justify-between text-xs text-charcoal/65 mb-1.5">
-              <span>20 m²</span>
-              <span>Ajuste rápido de superficie</span>
-              <span>2,500 m²</span>
-            </div>
-            <input type="range" id="calc-slider" min="20" max="2500" step="10" value="150" class="w-full accent-forest-800 cursor-pointer" />
+            <label class="block text-white/80 font-semibold mb-1.5">Tarifa Hora Ingeniería ($ MXN)</label>
+            <input type="number" id="param-hourly-rate" value="450" min="0" step="10" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 font-mono font-bold text-charcoal bg-white rounded-xl" />
           </div>
+          <div>
+            <label class="block text-white/80 font-semibold mb-1.5">Descuento Comercial (%)</label>
+            <input type="number" id="param-discount" value="0" min="0" max="100" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 font-mono font-bold text-charcoal bg-white rounded-xl" />
+          </div>
+          <div class="flex items-end">
+            <label class="inline-flex items-center gap-2.5 cursor-pointer bg-white/10 px-4 py-2.5 rounded-xl w-full border border-white/15">
+              <input type="checkbox" id="param-iva" checked onchange="recalculateAll()" class="w-4 h-4 rounded accent-bronze-400" />
+              <span class="font-semibold">Desglosar / Incluir IVA (16%)</span>
+            </label>
+          </div>
+        </div>
 
-          <!-- Extras opcionales -->
-          <div class="pt-2">
-            <span class="block text-sm font-bold text-forest-900 mb-2.5">4. Alcances Complementarios (Opcional)</span>
-            <div class="grid sm:grid-cols-2 gap-3 text-xs font-medium">
-              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-stonewarm-50 border border-forest-800/15 cursor-pointer hover:bg-forest-50">
-                <input type="checkbox" id="extra-memoria" class="w-4 h-4 accent-forest-800 rounded" />
-                <span>Memoria Descriptiva / Condominio</span>
-              </label>
-              <label class="flex items-center gap-2.5 p-3 rounded-xl bg-stonewarm-50 border border-forest-800/15 cursor-pointer hover:bg-forest-50">
-                <input type="checkbox" id="extra-instalaciones" class="w-4 h-4 accent-forest-800 rounded" />
-                <span>Ingenierías (Hidráulica, Sanitaria, Eléctrica)</span>
-              </label>
+        <div class="pt-4 border-t border-white/15">
+          <span class="block text-xs font-bold text-bronze-400 uppercase tracking-wider mb-3">Costos Paramétricos de Construcción por m² ($ MXN):</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <label class="block text-white/75 mb-1">Básica / Obra Gris</label>
+              <input type="number" id="const-rate-basica" value="11500" step="100" oninput="recalculateAll()" class="w-full px-3 py-2 font-mono font-bold text-charcoal bg-white rounded-xl" />
+            </div>
+            <div>
+              <label class="block text-white/75 mb-1">Estándar / Media</label>
+              <input type="number" id="const-rate-media" value="16500" step="100" oninput="recalculateAll()" class="w-full px-3 py-2 font-mono font-bold text-charcoal bg-white rounded-xl" />
+            </div>
+            <div>
+              <label class="block text-white/75 mb-1">Residencial Alta</label>
+              <input type="number" id="const-rate-alta" value="22500" step="100" oninput="recalculateAll()" class="w-full px-3 py-2 font-mono font-bold text-charcoal bg-white rounded-xl" />
+            </div>
+            <div>
+              <label class="block text-white/75 mb-1">Premium / Lujo</label>
+              <input type="number" id="const-rate-lujo" value="29500" step="100" oninput="recalculateAll()" class="w-full px-3 py-2 font-mono font-bold text-charcoal bg-white rounded-xl" />
             </div>
           </div>
         </div>
 
-        <!-- Panel de Resultado de Cotización -->
-        <div class="lg:col-span-5 bg-stonewarm-100 rounded-2xl p-6 sm:p-8 border border-forest-800/15 flex flex-col justify-between h-full">
-          <div>
-            <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-forest-700 mb-2">
-              <span>Estimado Preliminar</span>
-              <span class="px-2.5 py-0.5 rounded-md bg-white text-forest-900 border border-forest-800/10">MXN</span>
-            </div>
-            
-            <div class="my-4">
-              <div id="calc-total" class="font-serif text-3xl sm:text-4xl font-bold text-forest-900">$27,000 – $32,400 MXN</div>
-              <p id="calc-summary" class="text-xs text-charcoal/75 mt-2 leading-relaxed">
-                Basado en 150 m² para Residencial Unifamiliar • Proyecto Arquitectónico y Ejecutivo.
-              </p>
+        <div class="pt-4 border-t border-white/15 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="toggleAdminEditMode()" id="btn-toggle-crud" class="px-3.5 py-2 rounded-xl bg-forest-700 hover:bg-forest-600 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Editar / Borrar Conceptos</span>
+            </button>
+            <button type="button" onclick="openNewItemModal()" class="px-3.5 py-2 rounded-xl bg-bronze-400 hover:bg-bronze-500 text-forest-900 text-xs font-bold transition">
+              + Integrar Nuevo Programa / Servicio
+            </button>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="openEmbedModal()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-medium flex items-center gap-1.5 transition">
+              <i data-lucide="code" class="w-3.5 h-3.5"></i><span>Incrustar / JSON</span>
+            </button>
+            <button type="button" onclick="resetCatalogToDefault()" class="px-3.5 py-2 rounded-xl bg-rose-900/70 hover:bg-rose-800 text-rose-200 text-xs transition">
+              Restaurar Base
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISEÑO DE DOS COLUMNAS: IZQUIERDA EDITORIAL + DERECHA COTIZADOR INTERACTIVO -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+
+        <!-- COLUMNA IZQUIERDA EDITORIAL -->
+        <div class="lg:col-span-5 text-white space-y-5 lg:sticky lg:top-28 reveal">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-bronze-400/35 text-[11px] font-semibold tracking-wider uppercase text-bronze-400">
+            <i data-lucide="file-shield" class="w-3.5 h-3.5"></i>
+            <span>Aproximado · Cotización Previa a Autorización</span>
+          </div>
+
+          <h2 class="font-serif text-4xl sm:text-5xl font-bold tracking-tight leading-[1.08]">
+            Cotizador Técnico <span class="block text-bronze-400 italic font-semibold">Punto por Punto</span>
+          </h2>
+
+          <p class="text-base sm:text-lg font-medium text-white/95 leading-snug">
+            Descubre cuánto puede costar tu idea.<br/>
+            Arma tu alcance técnico en segundos.
+          </p>
+
+          <p class="text-sm text-white/75 leading-relaxed">
+            Esta herramienta de <strong class="text-white">STK Studio</strong> te permite estimar un <strong class="text-white">costo paramétrico aproximado</strong> para levantamientos en campo, planos arquitectónicos y ejecutivos, cálculo estructural, ingenierías MEP, topografía UTM y construcción.
+          </p>
+
+          <div class="p-4 rounded-2xl bg-forest-800/85 border border-white/15 text-xs text-white/85 space-y-2">
+            <p class="font-bold text-bronze-400 flex items-center gap-1.5">
+              <i data-lucide="scale" class="w-4 h-4"></i>
+              <span>Resguardo Legal y Contractual (México)</span>
+            </p>
+            <p class="leading-relaxed text-white/75">
+              Los costos definitivos se determinarán conforme a las <strong class="text-white">leyes mercantiles aplicables en México</strong>, legislación civil vigente, alcances técnicos levantados en campo y <strong class="text-white">contratos de prestación de servicios</strong> firmados entre las partes.
+            </p>
+          </div>
+
+          <!-- Acceso discreto a configuración de tarifas internas -->
+          <div class="pt-2">
+            <button type="button" onclick="toggleInternalSettings()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-medium text-white/85 transition">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-bronze-400"></i>
+              <span>Ajustar Tarifas Base / Catálogo (Admin)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: TARJETA INTERACTIVA COMPLETA -->
+        <div id="cotizador-card" class="lg:col-span-7 bg-white rounded-3xl shadow-2xl p-6 sm:p-8 text-charcoal space-y-6 reveal">
+
+          <!-- División Superior: Controles | Tarjeta Resumen de Paquete -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+
+            <!-- Controles de Entrada -->
+            <div class="md:col-span-7 space-y-4">
+              <!-- Tipo de proyecto -->
+              <div>
+                <label class="flex items-center gap-2 text-xs font-bold text-forest-900 mb-1.5">
+                  <i data-lucide="building" class="w-3.5 h-3.5 text-forest-700"></i>
+                  <span>Tipo de proyecto</span>
+                </label>
+                <select id="project-type" onchange="recalculateAll()" class="w-full px-3.5 py-2.5 text-sm bg-stonewarm-50 border border-forest-800/20 rounded-xl text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700 transition">
+                  <option value="residencial" data-factor="1.0">Residencial Unifamiliar</option>
+                  <option value="condominio" data-factor="1.10">Casa Dúplex / Régimen de Condominio</option>
+                  <option value="comercial" data-factor="1.15">Comercial / Oficinas</option>
+                  <option value="industrial" data-factor="1.25">Industrial / Nave</option>
+                  <option value="urbanismo" data-factor="0.90">Urbanismo / Terreno / Agrimensura</option>
+                </select>
+              </div>
+
+              <!-- Región / Ubicación -->
+              <div>
+                <label class="flex items-center gap-2 text-xs font-bold text-forest-900 mb-1.5">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-forest-700"></i>
+                  <span>Región / Estado o Municipio</span>
+                </label>
+                <select id="project-region" onchange="recalculateAll()" class="w-full px-3.5 py-2.5 text-sm bg-stonewarm-50 border border-forest-800/20 rounded-xl text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700 transition">
+                  <option value="Estado de México" data-reg-factor="1.0">Estado de México</option>
+                  <option value="Ciudad de México" data-reg-factor="1.08">Ciudad de México</option>
+                  <option value="Querétaro / Bajío" data-reg-factor="1.03">Querétaro / Bajío</option>
+                  <option value="Monterrey / Norte" data-reg-factor="1.12">Monterrey / Norte</option>
+                  <option value="Guadalajara / Occidente" data-reg-factor="1.05">Guadalajara / Occidente</option>
+                  <option value="Sureste / Costa" data-reg-factor="1.06">Sureste / Costa</option>
+                  <option value="Otra ubicación en México" data-reg-factor="1.0">Otra ubicación en México</option>
+                </select>
+              </div>
+
+              <!-- Tipo de servicio / Programa -->
+              <div>
+                <label class="flex items-center gap-2 text-xs font-bold text-forest-900 mb-1.5">
+                  <i data-lucide="settings" class="w-3.5 h-3.5 text-forest-700"></i>
+                  <span>Tipo de servicio / Programa</span>
+                </label>
+                <select id="service-program" onchange="handleProgramChange()" class="w-full px-3.5 py-2.5 text-sm bg-stonewarm-50 border border-forest-800/20 rounded-xl text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700 transition">
+                  <option value="anteproyecto">Anteproyecto Arquitectónico</option>
+                  <option value="ejecutivo">Proyecto Ejecutivo Integral</option>
+                  <option value="levantamientos">Levantamientos y Trabajos de Campo (7.3)</option>
+                  <option value="instalaciones">Ingenierías e Instalaciones (MEP)</option>
+                  <option value="construccion">Construcción / Ejecución de Obra</option>
+                  <option value="personalizado" selected>Personalizado Punto por Punto (A la medida)</option>
+                </select>
+              </div>
+
+              <!-- Caja descriptiva dinámica -->
+              <div id="program-description-box" class="p-3.5 rounded-xl bg-forest-50 border border-forest-800/15 text-xs text-forest-900 leading-relaxed">
+                Selecciona y combina libremente levantamientos, planos, ingenierías o construcción punto por punto para obtener una cotización previa aproximada.
+              </div>
+
+              <!-- Área en m² con Barra Slider + Nivel / Calidad -->
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="flex items-center gap-1.5 text-xs font-bold text-forest-900 mb-1.5">
+                      <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-forest-700"></i>
+                      <span>Superficie Estimada (m²)</span>
+                    </label>
+                    <div class="relative flex items-center">
+                      <input type="number" id="total-area" value="200" min="1" max="50000" step="1" oninput="syncSliderFromInput()" class="w-full px-3.5 py-2.5 pr-10 text-sm font-mono font-bold bg-stonewarm-50 border border-forest-800/20 rounded-xl text-charcoal focus:outline-none focus:ring-2 focus:ring-forest-700" />
+                      <span class="absolute right-3.5 text-xs font-bold text-forest-700">m²</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="flex items-center gap-1.5 text-xs font-bold text-forest-900 mb-1.5">
+                      <i data-lucide="layers" class="w-3.5 h-3.5 text-forest-700"></i>
+                      <span>Nivel / Calidad</span>
+                    </label>
+                    <select id="project-quality" onchange="recalculateAll()" class="w-full px-3.5 py-2.5 text-sm bg-stonewarm-50 border border-forest-800/20 rounded-xl text-charcoal font-medium focus:outline-none focus:ring-2 focus:ring-forest-700">
+                      <option value="basica">Básica / Funcional</option>
+                      <option value="media" selected>Estándar / Media</option>
+                      <option value="alta">Detallada / Residencial Alta</option>
+                      <option value="lujo">Especializada / Premium</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Barra deslizable m² -->
+                <div class="p-3 rounded-xl bg-stonewarm-50 border border-forest-800/15 space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px] font-semibold text-charcoal/70">
+                    <span>20 m²</span>
+                    <span class="text-forest-800 font-bold">Ajuste rápido de superficie</span>
+                    <span>2,500 m²</span>
+                  </div>
+                  <input type="range" id="area-slider" min="20" max="2500" step="10" value="200" oninput="syncInputFromSlider()" class="w-full h-2 bg-forest-100 rounded-lg appearance-none cursor-pointer accent-forest-800" />
+                </div>
+              </div>
             </div>
 
-            <div class="bg-white rounded-xl p-4 text-xs text-charcoal/80 space-y-2 border border-forest-800/10 mb-6">
-              <div class="flex items-center gap-2 text-forest-800 font-semibold">
-                <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
-                <span>Incluye asesoría técnica inicial</span>
+            <!-- Tarjeta Derecha de Resumen de Paquete -->
+            <div class="md:col-span-5 bg-stonewarm-100 border border-forest-800/15 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-forest-800 text-bronze-400 flex items-center justify-center shrink-0">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                  </div>
+                  <h3 class="text-xs font-extrabold uppercase tracking-wide text-forest-900" id="pkg-card-title">
+                    PERSONALIZADO PUNTO X PUNTO
+                  </h3>
+                </div>
+
+                <div>
+                  <span class="block text-[10px] font-bold uppercase tracking-wider text-forest-700">PROMEDIO ESTIMADO</span>
+                  <div class="text-2xl sm:text-3xl font-extrabold text-forest-900 font-mono mt-0.5" id="pkg-card-rate">
+                    $0.00 <span class="text-xs font-sans font-semibold text-charcoal/70">/ m²</span>
+                  </div>
+                </div>
+
+                <div class="border-t border-forest-800/15 pt-3">
+                  <span class="block text-[10px] font-bold uppercase tracking-wider text-forest-700 mb-2">¿QUÉ INCLUYE?</span>
+                  <ul id="pkg-card-includes" class="space-y-1.5 text-xs text-forest-900">
+                    <!-- Dinámico -->
+                  </ul>
+                </div>
               </div>
-              <p>Este cálculo es una referencia paramétrica. El presupuesto definitivo se ajusta tras revisar ubicación del predio, antecedentes documentales y alcances específicos.</p>
+
+              <div class="border-t border-forest-800/15 pt-3 flex items-start gap-2 text-[11px] text-charcoal/75">
+                <i data-lucide="info" class="w-3.5 h-3.5 mt-0.5 text-forest-700 shrink-0"></i>
+                <span id="pkg-card-note">Cotización previa aproximada. Sujeta a validación técnica y contrato de prestación de servicios.</span>
+              </div>
             </div>
           </div>
 
-          <div class="space-y-3">
-            <button id="send-quote-wa" class="w-full py-3.5 px-5 rounded-xl bg-forest-800 hover:bg-forest-700 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2">
-              <i data-lucide="message-circle" class="w-4 h-4 text-bronze-400"></i>
+          <!-- SELECTOR PUNTO POR PUNTO (CATÁLOGO 7.3 + A-N + PARTIDAS DE OBRA) -->
+          <div id="alcance-punto-a-punto" class="pt-5 border-t border-forest-800/10 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold uppercase tracking-wide text-forest-900">
+                  Selección Punto por Punto de Servicios y Programas
+                </h3>
+                <p class="text-xs text-charcoal/70">
+                  Activa o desactiva cada levantamiento, plano, ingeniería o partida de construcción.
+                </p>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" onclick="applyPreset('anteproyecto')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-forest-50 hover:bg-forest-100 text-forest-900 border border-forest-800/15 transition">Anteproyecto</button>
+                <button type="button" onclick="applyPreset('ejecutivo')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-forest-50 hover:bg-forest-100 text-forest-900 border border-forest-800/15 transition">Ejecutivo</button>
+                <button type="button" onclick="applyPreset('instalaciones')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-forest-50 hover:bg-forest-100 text-forest-900 border border-forest-800/15 transition">Instalaciones</button>
+                <button type="button" onclick="clearAllSelections()" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-rose-700 hover:bg-rose-50 transition">Limpiar</button>
+              </div>
+            </div>
+
+            <!-- Partidas de Construcción (Visible cuando se selecciona Construcción) -->
+            <div id="construction-partidas-box" class="hidden p-4 rounded-2xl bg-forest-50 border border-forest-800/20 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-forest-900">Partidas Paramétricas de Construcción (por m²)</span>
+                <span class="text-xs font-mono font-bold text-forest-800" id="const-m2-label">$16,500 / m²</span>
+              </div>
+              <div id="construction-checklist" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+            </div>
+
+            <!-- Buscador rápido en el catálogo -->
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-forest-700 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="search-input" oninput="renderChecklist()" placeholder="Buscar servicio, levantamiento o plano (ej. Topográfico, Arquitectónica, Cimentación, Eléctrica, Voz y Datos)..." class="w-full pl-10 pr-4 py-2.5 text-xs bg-stonewarm-50 border border-forest-800/20 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-forest-700 transition" />
+            </div>
+
+            <!-- Acordeones de Categorías -->
+            <div id="checklist-accordions" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1 custom-scroll"></div>
+          </div>
+
+          <!-- BANNER PRINCIPAL DE INVERSIÓN ESTIMADA -->
+          <div class="bg-forest-800 text-white rounded-2xl p-6 text-center shadow-inner space-y-1.5 relative overflow-hidden">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-bronze-400">
+              APROXIMADO · COTIZACIÓN PREVIA A AUTORIZACIÓN (MXN):
+            </p>
+            <div class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono" id="hero-total-amount">
+              $0.00
+            </div>
+            <p class="text-xs text-white/85 font-mono pt-0.5">
+              Costo aproximado por m²: <strong class="text-white" id="hero-cost-per-m2">$0.00 / m²</strong>
+              <span class="mx-1.5">·</span>
+              <span id="count-selected-items">0</span> conceptos activos
+            </p>
+          </div>
+
+          <!-- BOTONES DE ACCIÓN PRINCIPALES -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <button type="button" onclick="sendQuoteByEmail('ajuste')" class="w-full py-3.5 px-4 rounded-xl border-2 border-forest-800 bg-white hover:bg-forest-50 text-forest-900 font-bold text-xs sm:text-sm transition">
+              ¿Está fuera de tu presupuesto?
+            </button>
+
+            <button type="button" onclick="openQuoteModal()" class="w-full py-3.5 px-4 rounded-xl bg-forest-800 hover:bg-forest-700 text-white font-bold text-xs sm:text-sm transition shadow-sm flex items-center justify-center gap-2">
+              <i data-lucide="file-check" class="w-4 h-4 text-bronze-400"></i>
+              <span>Me interesa este resultado · Ver Detalle</span>
+            </button>
+          </div>
+
+          <!-- BOTONES DIRECTOS A WHATSAPP (56 3800 6027) Y GOOGLE MEET -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <button type="button" onclick="scheduleWhatsAppAdvisory()" class="w-full py-3.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#1FB858] text-white font-bold text-xs sm:text-sm transition shadow-sm flex items-center justify-center gap-2">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
               <span>Enviar Cotización por WhatsApp</span>
             </button>
-            <button id="send-quote-email" class="w-full py-3 px-5 rounded-xl bg-white hover:bg-forest-50 text-forest-900 border border-forest-800/20 font-semibold text-sm transition-all flex items-center justify-center gap-2">
-              <i data-lucide="mail" class="w-4 h-4 text-forest-700"></i>
-              <span>Solicitar Propuesta Formal por Correo</span>
+
+            <button type="button" onclick="scheduleMeetMeeting()" class="w-full py-3.5 px-4 rounded-xl bg-forest-900 hover:bg-charcoal text-white font-bold text-xs sm:text-sm transition shadow-sm flex items-center justify-center gap-2">
+              <i data-lucide="video" class="w-4 h-4 text-bronze-400"></i>
+              <span>Agendar Reunión por Google Meet</span>
             </button>
           </div>
+
+          <!-- AVISO LEGAL Y MERCANTIL DENTRO DE LA TARJETA -->
+          <div id="resguardo-legal" class="pt-3 border-t border-forest-800/10 text-[11px] text-charcoal/70 leading-relaxed space-y-1.5">
+            <p class="text-center font-semibold text-forest-900">
+              Aproximado · Cotización previa a autorización. Sujeta a validación técnica, visita/levantamiento en campo y alcances definitivos.
+            </p>
+            <p>
+              <strong>Aviso de Resguardo Legal y Mercantil:</strong> Los importes mostrados son meramente orientativos y paramétricos. Los costos exactos, condiciones de pago, anticipos, vigencias, garantías y responsabilidades serán definidos y obligatorios únicamente conforme a las <strong>leyes mercantiles aplicables en los Estados Unidos Mexicanos</strong> (incluyendo disposiciones del Código de Comercio y legislación civil supletoria), normatividad urbana/construcción local y los <strong>contratos de prestación de servicios</strong> debidamente suscritos por las partes.
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
   </section>
 
   <!-- Sección de Contacto y Agendamiento de Consultas -->
-  <section id="contacto" class="py-20 lg:py-28 bg-stonewarm-50">
+  <section id="contacto" class="py-20 lg:py-28 bg-stonewarm-50 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-12 gap-12">
         
@@ -789,12 +1197,9 @@
                 <i data-lucide="mail" class="w-4 h-4"></i>
               </div>
               <div class="break-all">
-                <span class="text-xs font-bold uppercase tracking-wider text-forest-700">Correos Electrónicos</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-forest-700">Correo Electrónico Oficial</span>
                 <p class="text-sm font-semibold text-charcoal mt-0.5">
                   <a href="mailto:arquitecturastudiok@gmail.com" class="hover:text-forest-800">arquitecturastudiok@gmail.com</a>
-                </p>
-                <p class="text-xs text-charcoal/75 mt-0.5">
-                  <a href="mailto:patracahernandezadal@gmail.com" class="hover:text-forest-800">patracahernandezadal@gmail.com</a>
                 </p>
               </div>
             </div>
@@ -803,9 +1208,26 @@
               <div class="w-9 h-9 rounded-xl bg-forest-100 text-forest-800 flex items-center justify-center shrink-0 mt-0.5">
                 <i data-lucide="map-pin" class="w-4 h-4"></i>
               </div>
-              <div>
+              <div class="w-full">
                 <span class="text-xs font-bold uppercase tracking-wider text-forest-700">Cobertura y Ubicación</span>
-                <p class="text-sm font-medium text-charcoal mt-0.5">Villa Nicolás Romero / Atizapán de Zaragoza, Estado de México y CDMX.</p>
+                <p class="text-sm font-medium text-charcoal mt-0.5 mb-2">Villa Nicolás Romero / Atizapán de Zaragoza, Estado de México y Zona Metropolitana de la CDMX (ZMVM).</p>
+                
+                <!-- Mapa Interactivo de Cobertura ZMVM resaltado en Rojo -->
+                <div class="w-full h-48 rounded-2xl overflow-hidden border border-forest-800/15 shadow-inner relative">
+                  <iframe 
+                    title="Mapa Cobertura ZMVM STK Studio"
+                    width="100%" 
+                    height="100%" 
+                    style="border:0; filter: contrast(1.05);" 
+                    loading="lazy" 
+                    allowfullscreen
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d240776.4533036423!2d-99.28369677322986!3d19.43260770514125!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1ffc0754bc099%3A0x633537827eef697e!2sZona%20Metropolitana%20de%20la%20Cd%20de%20M%C3%A9xico!5e0!3m2!1ses-419!2smx!4v1710000000000!5m2!1ses-419!2smx">
+                  </iframe>
+                  <div class="absolute inset-0 pointer-events-none border-4 border-rose-600/70 bg-rose-600/15 rounded-2xl"></div>
+                  <div class="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold tracking-wider uppercase shadow">
+                    Área de Cobertura ZMVM
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -868,7 +1290,6 @@
                 </button>
               </div>
 
-              <!-- Mensaje de confirmación inline -->
               <div id="form-feedback" class="hidden p-4 rounded-xl bg-forest-100 border border-forest-700/30 text-forest-900 text-sm font-medium"></div>
             </form>
           </div>
@@ -879,7 +1300,7 @@
   </section>
 
   <!-- Footer Profesional -->
-  <footer class="bg-forest-900 text-white/85 pt-16 pb-10 border-t border-forest-700/40">
+  <footer class="bg-forest-900 text-white/85 pt-16 pb-10 border-t border-forest-700/40 no-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/15">
         <!-- Marca -->
@@ -902,8 +1323,9 @@
           <ul class="space-y-2.5 text-sm">
             <li><a href="#inicio" class="hover:text-white transition-colors">Inicio</a></li>
             <li><a href="#servicios" class="hover:text-white transition-colors">Catálogo de Servicios</a></li>
+            <li><a href="#agendar" class="hover:text-white transition-colors">Agendar Asesoría</a></li>
             <li><a href="#trayectoria" class="hover:text-white transition-colors">Trayectoria y Proyectos</a></li>
-            <li><a href="#cotizador" class="hover:text-white transition-colors">Cotizador de Honorarios</a></li>
+            <li><a href="#cotizador" class="hover:text-white transition-colors">Cotizador Punto x Punto</a></li>
             <li><a href="#contacto" class="hover:text-white transition-colors">Agendar Consulta</a></li>
           </ul>
         </div>
@@ -924,14 +1346,194 @@
 
       <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/60">
         <p>© 2026 STK Studio Ingeniería y Arquitectura. Todos los derechos reservados.</p>
-        <p>Aviso Técnico: Todos los proyectos y dictámenes se ejecutan bajo normatividad vigente y verificación en sitio.</p>
+
+        <!-- Acceso discreto para Arquitecto escondido en el footer -->
+        <div class="flex items-center gap-3">
+          <button onclick="openArchitectLoginModal()" class="hover:text-bronze-400 transition-colors cursor-pointer opacity-40 hover:opacity-100 text-[11px] flex items-center gap-1">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            <span>Acceso Privado Arquitecto</span>
+          </button>
+        </div>
       </div>
     </div>
   </footer>
 
-  <!-- Modal de Detalle de Servicios -->
-  <div id="service-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-forest-900/75 backdrop-blur-xs">
-    <div class="bg-white rounded-3xl max-w-xl w-full p-7 sm:p-8 shadow-2xl border border-forest-800/15 relative animate-fadeIn">
+  <!-- =========================================================================
+       MODAL LOGIN: ACCESO EXCLUSIVO ARQUITECTO (DESPACHO & CONTROL)
+       ========================================================================= -->
+  <div id="architect-login-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-forest-900/80 backdrop-blur-md no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-forest-800/20 relative">
+      <button onclick="closeArchitectLoginModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-stonewarm-100 hover:bg-forest-100 text-charcoal transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-3 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-forest-900 text-bronze-400 flex items-center justify-center mx-auto shadow-md">
+          <i data-lucide="key" class="w-7 h-7"></i>
+        </div>
+        <h3 class="font-serif text-3xl font-bold text-forest-900">Acceso de Arquitecto</h3>
+        <p class="text-xs text-charcoal/70">
+          Ingresa tu usuario y contraseña para abrir la lista de clientes, citas registradas y métricas de visitas al sitio.
+        </p>
+      </div>
+
+      <form onsubmit="handleArchitectLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-forest-900 mb-1.5">USUARIO</label>
+          <input type="text" id="auth-user" required placeholder="arq.stk" class="w-full px-4 py-3 text-sm rounded-xl bg-stonewarm-50 border border-forest-800/20 focus:outline-none focus:ring-2 focus:ring-forest-700 font-mono" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-forest-900 mb-1.5">CONTRASEÑA</label>
+          <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full px-4 py-3 text-sm rounded-xl bg-stonewarm-50 border border-forest-800/20 focus:outline-none focus:ring-2 focus:ring-forest-700 font-mono" />
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-forest-900 hover:bg-forest-800 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2">
+          <i data-lucide="lock" class="w-4 h-4 text-bronze-400"></i>
+          <span>ENTRAR A VENTANA DE ARQUITECTO</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL VENTANA DE ARQUITECTO - PANEL DE CONTROL PRIVADO
+       ========================================================================= -->
+  <div id="architect-dashboard-modal" class="fixed inset-0 z-50 hidden bg-stonewarm-50 overflow-y-auto no-print">
+    <!-- Header del Dashboard -->
+    <header class="bg-forest-900 text-white border-b border-forest-700/40 sticky top-0 z-10 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-bronze-500 text-forest-900 font-bold flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="font-serif text-xl font-bold">Ventana de Arquitecto — Control STK Studio</h2>
+            <p class="text-xs text-white/75">Sesión Activa: Ing. Arq. Agustín Patraca H.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="exportDataToCSV()" class="px-3.5 py-2 rounded-xl bg-bronze-500 hover:bg-bronze-600 text-forest-900 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Exportar Clientes a Excel (.CSV)</span>
+          </button>
+
+          <button onclick="closeArchitectDashboard()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition flex items-center gap-1.5">
+            <i data-lucide="eye" class="w-4 h-4 text-bronze-400"></i>
+            <span>Volver a Vista Cliente</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      <!-- Fila de Tarjetas de Métrica General -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-2xl p-6 border border-forest-800/12 shadow-sm">
+          <div class="flex items-center justify-between text-forest-700 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider">Visitas Totales Web</span>
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-extrabold font-mono text-forest-900" id="dash-total-visits">0</div>
+          <p class="text-[11px] text-charcoal/65 mt-1">Registradas automáticamente</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-forest-800/12 shadow-sm">
+          <div class="flex items-center justify-between text-forest-700 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider">Visitas Hoy</span>
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-extrabold font-mono text-forest-900" id="dash-today-visits">0</div>
+          <p class="text-[11px] text-charcoal/65 mt-1" id="dash-last-visit-time">Última: En este momento</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-forest-800/12 shadow-sm">
+          <div class="flex items-center justify-between text-forest-700 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider">Citas Agendadas</span>
+            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-extrabold font-mono text-forest-900" id="dash-total-bookings">0</div>
+          <p class="text-[11px] text-charcoal/65 mt-1">Asesorías de 45 min</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-forest-800/12 shadow-sm">
+          <div class="flex items-center justify-between text-forest-700 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider">Cotizaciones / Clientes</span>
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <div class="text-3xl font-extrabold font-mono text-forest-900" id="dash-total-quotes">0</div>
+          <p class="text-[11px] text-charcoal/65 mt-1">Registradas en la plataforma</p>
+        </div>
+      </div>
+
+      <!-- Tabla 1: Registro Automático de Citas Agendadas -->
+      <div class="bg-white rounded-3xl p-6 border border-forest-800/12 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-serif text-2xl font-bold text-forest-900">Agenda de Citas Programadas</h3>
+            <p class="text-xs text-charcoal/70">Fechas y horarios seleccionados por los clientes en la web.</p>
+          </div>
+          <button onclick="clearBookingsRegistry()" class="text-xs text-rose-700 hover:underline font-semibold">Limpiar Historial Citas</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-forest-50 text-forest-900 font-bold uppercase border-b border-forest-800/15">
+                <th class="p-3">Fecha de Cita</th>
+                <th class="p-3">Horario</th>
+                <th class="p-3">Cliente</th>
+                <th class="p-3">Teléfono / WhatsApp</th>
+                <th class="p-3">Servicio</th>
+                <th class="p-3">Importe</th>
+                <th class="p-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="dash-bookings-tbody">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tabla 2: Base de Datos Unificada de Clientes y Solicitudes -->
+      <div class="bg-white rounded-3xl p-6 border border-forest-800/12 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-serif text-2xl font-bold text-forest-900">Hoja de Clientes, Cotizaciones y Consultas</h3>
+            <p class="text-xs text-charcoal/70">Formato acumulativo privado con datos, correos, proyectos y presupuestos solicitados.</p>
+          </div>
+          <button onclick="clearClientsRegistry()" class="text-xs text-rose-700 hover:underline font-semibold">Limpiar Registro Clientes</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-stonewarm-100 text-forest-900 font-bold uppercase border-b border-forest-800/15">
+                <th class="p-3">Fecha Registro</th>
+                <th class="p-3">Nombre Cliente</th>
+                <th class="p-3">Teléfono</th>
+                <th class="p-3">Correo</th>
+                <th class="p-3">Tipo / Proyecto</th>
+                <th class="p-3">Estimado previo</th>
+                <th class="p-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="dash-clients-tbody">
+              <!-- Renderizado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL 0: Detalle de Alcances de Servicios -->
+  <div id="service-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-forest-900/75 backdrop-blur-xs no-print">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-7 sm:p-8 shadow-2xl border border-forest-800/15 relative">
       <button onclick="closeServiceModal()" aria-label="Cerrar detalle" class="absolute top-5 right-5 p-2 rounded-xl bg-stonewarm-100 hover:bg-forest-100 text-charcoal transition-colors">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -948,29 +1550,149 @@
         <a href="#cotizador" onclick="closeServiceModal()" class="flex-1 py-3 px-5 rounded-xl bg-forest-800 hover:bg-forest-700 text-white text-center font-semibold text-sm transition-colors">
           Estimar este Servicio
         </a>
-        <a href="#contacto" onclick="closeServiceModal()" class="py-3 px-5 rounded-xl bg-stonewarm-100 hover:bg-forest-100 text-forest-900 text-center font-semibold text-sm transition-colors">
+        <a href="#agendar" onclick="closeServiceModal()" class="py-3 px-5 rounded-xl bg-stonewarm-100 hover:bg-forest-100 text-forest-900 text-center font-semibold text-sm transition-colors">
           Agendar Asesoría
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Scripts de Interactividad -->
+  <!-- MODAL 1: Cotización Formal Imprimible / PDF (Detalle Punto por Punto) -->
+  <div id="print-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs overflow-y-auto p-4 sm:p-8 flex justify-center items-start">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden my-auto border border-forest-800/15">
+      <div class="bg-forest-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2 no-print">
+        <span class="font-bold text-sm flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-bronze-400"></i>
+          <span>Cotización Previa Aproximada — STK Studio</span>
+        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="sendQuoteByEmail('interes')" class="px-3.5 py-1.5 rounded-xl bg-bronze-400 text-forest-900 font-bold text-xs hover:bg-bronze-500 transition flex items-center gap-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i><span>Solicitar Formalización</span>
+          </button>
+          <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl bg-white text-forest-900 font-bold text-xs hover:bg-stonewarm-100 transition flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i><span>Imprimir / PDF</span>
+          </button>
+          <button onclick="closeQuoteModal()" class="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold">
+            Cerrar
+          </button>
+        </div>
+      </div>
+      <div class="p-8 sm:p-10 space-y-6 text-charcoal" id="formal-quote-content"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Agregar / Editar Concepto del Catálogo (Admin) -->
+  <div id="item-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-xs overflow-y-auto p-4 flex justify-center items-center no-print">
+    <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-forest-800/15">
+      <div class="bg-forest-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-sm" id="item-modal-title">Integrar Nuevo Programa / Servicio</h3>
+        <button onclick="closeItemModal()" class="text-white/75 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="item-form" onsubmit="saveCustomItem(event)" class="p-6 space-y-4 text-sm">
+        <input type="hidden" id="edit-item-id" />
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Tipo de Cálculo</label>
+            <select id="edit-item-type" onchange="toggleItemFormFields()" class="w-full px-3 py-2 bg-stonewarm-50 border border-forest-800/20 rounded-xl">
+              <option value="plan">Plano / Ingeniería (Rendimiento m²/h)</option>
+              <option value="survey">Levantamiento / Servicio ($ por m²)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Código</label>
+            <input type="text" id="edit-item-code" required placeholder="Ej. BIM-01" class="w-full px-3 py-2 font-mono bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-forest-900 mb-1">Categoría</label>
+          <select id="edit-item-category" class="w-full px-3 py-2 bg-stonewarm-50 border border-forest-800/20 rounded-xl"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-forest-900 mb-1">Nombre del Concepto / Programa</label>
+          <input type="text" id="edit-item-name" required placeholder="Ej. Recorrido Virtual BIM / Gestión de Trámite" class="w-full px-3 py-2 bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+        </div>
+        <div id="fields-survey" class="hidden grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Precio por m² ($ MXN)</label>
+            <input type="number" id="edit-item-price" step="0.01" min="0" value="15.00" class="w-full px-3 py-2 font-mono bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Unidad</label>
+            <input type="text" id="edit-item-unit" value="m²" class="w-full px-3 py-2 font-mono bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+          </div>
+        </div>
+        <div id="fields-plan" class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Sup. Ref. (m²)</label>
+            <input type="number" id="edit-item-ref-area" step="1" min="1" value="200" class="w-full px-3 py-2 font-mono bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Rendimiento (m²/h)</label>
+            <input type="number" id="edit-item-yield" step="0.01" min="0.1" value="35.00" class="w-full px-3 py-2 font-mono bg-stonewarm-50 border border-forest-800/20 rounded-xl" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-forest-900 mb-1">Complejidad</label>
+            <select id="edit-item-complexity" class="w-full px-2.5 py-2 bg-stonewarm-50 border border-forest-800/20 rounded-xl">
+              <option value="Baja">Baja (0.8)</option>
+              <option value="Media" selected>Media (1.0)</option>
+              <option value="Alta">Alta (1.25)</option>
+              <option value="Muy alta">Muy alta (1.5)</option>
+            </select>
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2 border-t border-forest-800/10">
+          <button type="button" onclick="closeItemModal()" class="px-4 py-2 rounded-xl text-charcoal/70 hover:bg-stonewarm-100 text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-forest-800 text-white text-xs font-bold">Guardar Concepto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Exportar / Importar JSON e Iframe -->
+  <div id="embed-modal" class="hidden fixed inset-0 z-50 bg-black/65 backdrop-blur-xs overflow-y-auto p-4 flex justify-center items-center no-print">
+    <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-forest-800/15">
+      <div class="bg-forest-900 text-white px-6 py-4 flex items-center justify-between">
+        <h3 class="font-bold text-sm">Integración Web / Respaldo JSON (STK Studio)</h3>
+        <button onclick="closeEmbedModal()" class="text-white/75 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-6 space-y-4 text-sm">
+        <div>
+          <div class="flex justify-between mb-1">
+            <label class="text-xs font-bold text-forest-900">Código Iframe (GitHub Pages):</label>
+            <button onclick="copyTextFromId('embed-iframe-code')" class="text-xs text-forest-700 font-bold hover:underline">Copiar</button>
+          </div>
+          <textarea id="embed-iframe-code" readonly rows="2" class="w-full p-2.5 font-mono text-xs bg-forest-900 text-bronze-400 rounded-xl">&lt;iframe src="https://tu-usuario.github.io/stk-studio/#cotizador" width="100%" height="1250px" frameborder="0"&gt;&lt;/iframe&gt;</textarea>
+        </div>
+        <div>
+          <div class="flex justify-between mb-1">
+            <label class="text-xs font-bold text-forest-900">Base de Datos JSON de Precios y Rendimientos:</label>
+            <div class="flex gap-3">
+              <button onclick="copyTextFromId('json-data-box')" class="text-xs text-forest-700 font-bold hover:underline">Copiar JSON</button>
+              <button onclick="importJSONData()" class="text-xs text-bronze-600 font-bold hover:underline">Importar JSON</button>
+            </div>
+          </div>
+          <textarea id="json-data-box" rows="7" class="w-full p-3 font-mono text-[11px] bg-stonewarm-50 rounded-xl border border-forest-800/20"></textarea>
+        </div>
+        <div class="flex justify-end">
+          <button onclick="closeEmbedModal()" class="px-5 py-2 rounded-xl bg-forest-800 text-white text-xs font-semibold">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts de Interactividad, Motor de Cotización y Control de Arquitecto -->
   <script>
-    // Inicializar iconos Lucide
     lucide.createIcons();
 
-    // Menú móvil
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
-    document.querySelectorAll('.mobile-link').forEach(link => {
-      link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
-    });
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+      document.querySelectorAll('.mobile-link').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+    }
 
-    // Animación Scroll Reveal y Contadores Numéricos
     const revealElements = document.querySelectorAll('.reveal');
     const counters = document.querySelectorAll('.counter');
     let countersStarted = false;
@@ -978,9 +1700,8 @@
     function runCounters() {
       counters.forEach(counter => {
         const target = +counter.getAttribute('data-target');
-        const duration = 1600;
-        const stepTime = Math.max(Math.floor(duration / target), 20);
         let current = 0;
+        const stepTime = Math.max(Math.floor(1500 / Math.max(target, 1)), 20);
         const timer = setInterval(() => {
           current += 1;
           counter.textContent = current;
@@ -1006,32 +1727,22 @@
 
     revealElements.forEach(el => observer.observe(el));
 
-    // Filtro de pestañas en Catálogo de Servicios
-    const serviceTabs = document.querySelectorAll('.service-tab');
-    const serviceCards = document.querySelectorAll('.service-card');
-
-    serviceTabs.forEach(tab => {
+    document.querySelectorAll('.service-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const category = tab.getAttribute('data-category');
-        
-        serviceTabs.forEach(t => {
+        document.querySelectorAll('.service-tab').forEach(t => {
           t.classList.remove('bg-forest-800', 'text-white', 'shadow-sm');
           t.classList.add('bg-stonewarm-100', 'text-charcoal');
         });
         tab.classList.remove('bg-stonewarm-100', 'text-charcoal');
         tab.classList.add('bg-forest-800', 'text-white', 'shadow-sm');
 
-        serviceCards.forEach(card => {
-          if (category === 'all' || card.getAttribute('data-category') === category) {
-            card.style.display = 'flex';
-          } else {
-            card.style.display = 'none';
-          }
+        document.querySelectorAll('.service-card').forEach(card => {
+          card.style.display = (category === 'all' || card.getAttribute('data-category') === category) ? 'flex' : 'none';
         });
       });
     });
 
-    // Modal de Alcances de Servicios
     const serviceDetails = {
       arquitectura: {
         badge: 'Arquitectura y Diseño Ejecutivo',
@@ -1085,15 +1796,12 @@
       document.getElementById('modal-badge').textContent = data.badge;
       document.getElementById('modal-title').textContent = data.title;
       document.getElementById('modal-desc').textContent = data.desc;
-      
-      const list = document.getElementById('modal-list');
-      list.innerHTML = data.items.map(item => `
+      document.getElementById('modal-list').innerHTML = data.items.map(item => `
         <li class="flex items-start gap-2.5">
           <span class="w-1.5 h-1.5 rounded-full bg-bronze-500 mt-2 shrink-0"></span>
           <span>${item}</span>
         </li>
       `).join('');
-
       const modal = document.getElementById('service-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -1105,131 +1813,1032 @@
       modal.classList.remove('flex');
     }
 
-    document.getElementById('service-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'service-modal') closeServiceModal();
-    });
+    // =========================================================================
+    // CALENDARIO DE CITAS Y ASESORÍAS
+    // =========================================================================
+    let currentYear = 2026;
+    let currentMonth = 10; // Noviembre (0-indexed)
+    let selectedDateStr = '';
+    let selectedTimeSlot = '';
+    const TIME_SLOTS = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '04:00 PM', '05:00 PM', '06:00 PM'];
+    const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-    // Calculadora / Estimador Interactivo de Honorarios
-    const calcService = document.getElementById('calc-service');
-    const calcProperty = document.getElementById('calc-property');
-    const calcSqm = document.getElementById('calc-sqm');
-    const calcSlider = document.getElementById('calc-slider');
-    const extraMemoria = document.getElementById('extra-memoria');
-    const extraInstalaciones = document.getElementById('extra-instalaciones');
-    const calcTotal = document.getElementById('calc-total');
-    const calcSummary = document.getElementById('calc-summary');
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar();
+    }
 
-    const serviceRates = {
-      proyecto: { base: 8500, perSqm: 135, label: 'Proyecto Arquitectónico y Ejecutivo' },
-      estructural: { base: 7500, perSqm: 105, label: 'Cálculo Estructural y Planos (NTC)' },
-      topografia: { base: 6500, perSqm: 28, label: 'Levantamiento Topográfico UTM / RAN' },
-      regularizacion: { base: 9000, perSqm: 85, label: 'Regularización / Dictamen STPS / D.R.O.' },
-      render: { base: 5500, perSqm: 45, label: 'Modelado 3D y Renderizado Fotorrealista' },
-      supervision: { base: 12000, perSqm: 115, label: 'Supervisión y Residencia de Obra' }
+    function renderCalendar() {
+      const titleEl = document.getElementById('calendar-month-year');
+      const gridEl = document.getElementById('calendar-days-grid');
+      const slotsEl = document.getElementById('time-slots-container');
+      if (!titleEl || !gridEl || !slotsEl) return;
+
+      titleEl.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      let daysHtml = '';
+      for (let i = 0; i < startOffset; i++) {
+        daysHtml += `<div class="p-2 text-charcoal/25">·</div>`;
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const mStr = String(currentMonth + 1).padStart(2, '0');
+        const dStr = String(d).padStart(2, '0');
+        const fullDate = `${currentYear}-${mStr}-${dStr}`;
+        const isSelected = selectedDateStr === fullDate;
+        daysHtml += `
+          <button type="button" onclick="selectDate('${fullDate}')" class="p-2.5 rounded-xl font-semibold transition ${
+            isSelected ? 'bg-forest-800 text-white shadow-sm' : 'hover:bg-forest-50 text-forest-900 border border-transparent hover:border-forest-800/15'
+          }">${d}</button>
+        `;
+      }
+      gridEl.innerHTML = daysHtml;
+
+      slotsEl.innerHTML = TIME_SLOTS.map(slot => {
+        const active = selectedTimeSlot === slot;
+        return `
+          <button type="button" onclick="selectTime('${slot}')" class="py-2.5 px-2 rounded-xl border transition ${
+            active ? 'bg-forest-800 text-white border-forest-800 shadow-sm' : 'bg-stonewarm-50 hover:bg-forest-50 text-forest-900 border-forest-800/15'
+          }">${slot}</button>
+        `;
+      }).join('');
+
+      updateDateBanner();
+    }
+
+    function selectDate(dateStr) {
+      selectedDateStr = dateStr;
+      renderCalendar();
+    }
+
+    function selectTime(slot) {
+      selectedTimeSlot = slot;
+      renderCalendar();
+    }
+
+    function updateDateBanner() {
+      const banner = document.getElementById('selected-datetime-banner');
+      if (!banner) return;
+      if (selectedDateStr && selectedTimeSlot) {
+        banner.textContent = `Seleccionado: ${selectedDateStr} a las ${selectedTimeSlot} (45 min)`;
+      } else {
+        banner.textContent = 'Aún no has elegido fecha y hora';
+      }
+    }
+
+    function convertTimeTo24(slot) {
+      const [time, period] = slot.split(' ');
+      let [hrs, mins] = time.split(':').map(Number);
+      if (period === 'PM' && hrs !== 12) hrs += 12;
+      if (period === 'AM' && hrs === 12) hrs = 0;
+      return `${String(hrs).padStart(2, '0')}${String(mins).padStart(2, '0')}`;
+    }
+
+    function add45Minutes(hhmm) {
+      let hrs = parseInt(hhmm.slice(0, 2), 10);
+      let mins = parseInt(hhmm.slice(2, 4), 10) + 45;
+      if (mins >= 60) {
+        hrs += Math.floor(mins / 60);
+        mins = mins % 60;
+      }
+      return `${String(hrs % 24).padStart(2, '0')}${String(mins).padStart(2, '0')}`;
+    }
+
+    function handleBookingSubmit(e) {
+      e.preventDefault();
+      if (!selectedDateStr || !selectedTimeSlot) {
+        showToast('Selecciona una fecha y un horario primero.', 'error');
+        return;
+      }
+      const clientName = document.getElementById('booking-name').value.trim();
+      const clientPhone = document.getElementById('booking-phone').value.trim();
+      const clientEmail = document.getElementById('booking-email').value.trim();
+
+      saveBookingToDB({ date: selectedDateStr, time: selectedTimeSlot, clientName, clientPhone, clientEmail });
+
+      const cleanDate = selectedDateStr.replace(/-/g, '');
+      const start24 = convertTimeTo24(selectedTimeSlot);
+      const end24 = add45Minutes(start24);
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Asesoría STK Studio - ' + clientName)}&dates=${cleanDate}T${start24}00/${cleanDate}T${end24}00&details=${encodeURIComponent('Cliente: ' + clientName + ' | Tel: ' + clientPhone + ' | Gmail: ' + clientEmail)}&ctz=America/Mexico_City`;
+
+      const mailSubject = encodeURIComponent(`Nueva Cita Agendada STK Studio - ${clientName} (${selectedDateStr} ${selectedTimeSlot})`);
+      const mailBody = encodeURIComponent(
+        `Se ha agendado una asesoría en línea:\n\n` +
+        `• Fecha: ${selectedDateStr}\n` +
+        `• Horario: ${selectedTimeSlot} (45 min)\n` +
+        `• Cliente: ${clientName}\n` +
+        `• Teléfono / WhatsApp: ${clientPhone}\n` +
+        `• Correo Gmail Cliente: ${clientEmail}\n` +
+        `• Google Calendar: ${gcalUrl}`
+      );
+      window.location.href = `mailto:arquitecturastudiok@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+
+      window.open(gcalUrl, '_blank', 'noopener,noreferrer');
+      showToast('Cita registrada y enviada a arquitecturastudiok@gmail.com', 'success');
+    }
+
+    // =========================================================================
+    // MOTOR DE COTIZACIÓN PUNTO POR PUNTO
+    // =========================================================================
+    const COMPLEXITY_FACTORS = { 'Baja': 0.8, 'Media': 1.0, 'Alta': 1.25, 'Muy alta': 1.5 };
+    const QUALITY_MULTIPLIER = { 'basica': 0.85, 'media': 1.0, 'alta': 1.20, 'lujo': 1.45 };
+
+    const PROGRAM_PRESETS = {
+      anteproyecto: {
+        title: 'ANTEPROYECTO',
+        desc: 'Define la distribución espacial, zonificación y propuesta arquitectónica inicial antes de pasar a planos ejecutivos.',
+        note: 'Ideal para validar programa arquitectónico y viabilidad previa a autorización.',
+        includes: ['Levantamiento arquitectónico / ubicación', 'Planta arquitectónica y amueblada', 'Fachadas y cortes arquitectónicos'],
+        codes: ['LEV-01', 'PG-UP-01', 'AR-01', 'AR-02', 'AR-03', 'AR-09', 'AR-10'],
+        showConstruction: false
+      },
+      ejecutivo: {
+        title: 'PROYECTO EJECUTIVO',
+        desc: 'Documentación técnica detallada de arquitectura, estructura e instalaciones para construcción y presupuestos de obra.',
+        note: 'Aproximado sujeto a mecánica de suelos, normativa local y contrato de servicios.',
+        includes: ['Planos arquitectónicos y detalles constructivos', 'Cimentación, losas, trabes y memoria estructural', 'Instalaciones sanitarias, pluviales y eléctricas'],
+        codes: ['LEV-01', 'PG-UP-01', 'AR-01', 'AR-02', 'AR-05', 'AR-06', 'AR-09', 'AR-10', 'AR-13', 'AR-14', 'E-01', 'E-03', 'E-04', 'E-05', 'E-12', 'IS-01', 'IPL-01', 'IE-01', 'IE-05'],
+        showConstruction: false
+      },
+      levantamientos: {
+        title: 'LEVANTAMIENTOS (7.3)',
+        desc: 'Trabajos de campo, inspección física, medición y diagnóstico técnico del inmueble o terreno.',
+        note: 'Tarifa paramétrica por m² sujeta a condiciones de acceso y verificación en sitio.',
+        includes: ['Levantamiento arquitectónico y topográfico', 'Inspección y supervisión técnica inicial', 'Reporte fotográfico y plano As-Built'],
+        codes: ['LEV-01', 'LEV-02', 'LEV-16', 'LEV-17', 'LEV-18', 'LEV-19', 'LEV-20'],
+        showConstruction: false
+      },
+      instalaciones: {
+        title: 'INSTALACIONES (MEP)',
+        desc: 'Sistemas hidráulicos, sanitarios, pluviales, eléctricos, gas, HVAC, voz y datos y seguridad.',
+        note: 'Calculado por rendimiento y complejidad según m² del proyecto.',
+        includes: ['Sanitario, isométrico y captación pluvial', 'Eléctrico, cuadro de cargas, unifilar y tierra', 'Gas, HVAC, voz y datos y seguridad (CCTV)'],
+        codes: ['IS-01', 'IS-03', 'IPL-01', 'IE-01', 'IE-05', 'IE-06', 'IE-08', 'IG-01', 'HVAC-01', 'IT-01', 'SC-01'],
+        showConstruction: false
+      },
+      construccion: {
+        title: 'CONSTRUCCIÓN / OBRA',
+        desc: 'Estimación paramétrica de ejecución de obra por m² conforme al nivel de calidad seleccionado.',
+        note: 'Los costos definitivos de obra se formalizan en contrato conforme a leyes mercantiles en México.',
+        includes: ['Cimentación, estructura y albañilerías', 'Instalaciones básicas y acabados de obra', 'Control y supervisión de avances'],
+        codes: [],
+        showConstruction: true
+      },
+      personalizado: {
+        title: 'PERSONALIZADO PUNTO X PUNTO',
+        desc: 'Arma tu combinación exacta de levantamientos, planos, especialidades o construcción según lo que requiera tu proyecto.',
+        note: 'Cotización previa aproximada; los alcances finales se formalizan por contrato.',
+        includes: ['Selección libre punto por punto de partidas', 'Cálculo dinámico por m², rendimiento y complejidad', 'Desglose previo a autorización del cliente'],
+        codes: null,
+        showConstruction: false
+      }
     };
 
-    function formatMXN(amount) {
-      return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(amount);
+    const CONSTRUCTION_PARTIDAS = [
+      { id: 'OB-01', name: 'Preliminares, Trazo y Cimentación', weight: 0.16, selected: false },
+      { id: 'OB-02', name: 'Estructura, Losas y Albañilería (Obra Negra)', weight: 0.28, selected: false },
+      { id: 'OB-03', name: 'Instalaciones Hidrosanitarias, Eléctricas y Gas', weight: 0.18, selected: false },
+      { id: 'OB-04', name: 'Aplanados, Plafones e Impermeabilización', weight: 0.12, selected: false },
+      { id: 'OB-05', name: 'Pisos, Recubrimientos y Pintura', weight: 0.14, selected: false },
+      { id: 'OB-06', name: 'Carpintería, Herrería, Cancelería y Muebles de Baño', weight: 0.12, selected: false }
+    ];
+
+    const CATEGORIES = [
+      { id: '7.3', label: '7.3 Levantamientos y Trabajos de Campo', defaultOpen: false },
+      { id: 'A', label: 'A. Planos Generales y Estado Actual', defaultOpen: false },
+      { id: 'B', label: 'B. Proyecto Arquitectónico y Detalles', defaultOpen: false },
+      { id: 'C', label: 'C. Ingeniería Estructural y Memoria de Cálculo', defaultOpen: false },
+      { id: 'E-F', label: 'E-F. Instalación Sanitaria y Pluvial', defaultOpen: false },
+      { id: 'G', label: 'G. Instalación Eléctrica', defaultOpen: false },
+      { id: 'H', label: 'H. Gas L.P. / Gas Natural', defaultOpen: false },
+      { id: 'I', label: 'I. HVAC / Aire Acondicionado y Ventilación', defaultOpen: false },
+      { id: 'J-K', label: 'J-K. Voz, Datos, CCTV y Seguridad', defaultOpen: false },
+      { id: 'L', label: 'L. Urbanismo y Obras Exteriores', defaultOpen: false },
+      { id: 'M', label: 'M. Topografía y Coordenadas UTM', defaultOpen: false },
+      { id: 'N', label: 'N. Ambiental y Sustentabilidad', defaultOpen: false }
+    ];
+
+    const DEFAULT_CATALOG = [
+      { id: 'LEV-01', category: '7.3', type: 'survey', code: 'LEV-01', name: 'Levantamiento Arquitectónico', unitPrice: 35.00, unit: 'm²' },
+      { id: 'LEV-02', category: '7.3', type: 'survey', code: 'LEV-02', name: 'Levantamiento Topográfico', unitPrice: 18.00, unit: 'm²' },
+      { id: 'LEV-16', category: '7.3', type: 'survey', code: 'LEV-16', name: 'Inspección Técnica de Obra', unitPrice: 8.00, unit: 'm²' },
+      { id: 'LEV-17', category: '7.3', type: 'survey', code: 'LEV-17', name: 'Supervisión Técnica Inicial', unitPrice: 10.00, unit: 'm²' },
+      { id: 'LEV-18', category: '7.3', type: 'survey', code: 'LEV-18', name: 'Reporte Fotográfico Técnico', unitPrice: 6.00, unit: 'm²' },
+      { id: 'LEV-19', category: '7.3', type: 'survey', code: 'LEV-19', name: 'Elaboración de Plano As-Built', unitPrice: 15.00, unit: 'm²' },
+      { id: 'LEV-20', category: '7.3', type: 'survey', code: 'LEV-20', name: 'Verificación Física del Inmueble', unitPrice: 8.00, unit: 'm²' },
+      { id: 'PG-UP-01', category: 'A', type: 'plan', code: 'PG-UP-01', name: 'Plano de ubicación y perimétrico', refArea: 500, complexity: 'Baja', yieldRate: 100.00 },
+      { id: 'PG-T-01', category: 'A', type: 'plan', code: 'PG-T-01', name: 'Planimetría general de topografía', refArea: 500, complexity: 'Media', yieldRate: 62.50 },
+      { id: 'AR-01', category: 'B', type: 'plan', code: 'AR-01', name: 'Planta arquitectónica', refArea: 200, complexity: 'Media', yieldRate: 33.33 },
+      { id: 'AR-02', category: 'B', type: 'plan', code: 'AR-02', name: 'Planta arquitectónica amueblada', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'AR-03', category: 'B', type: 'plan', code: 'AR-03', name: 'Planta de conjunto', refArea: 500, complexity: 'Media', yieldRate: 100.00 },
+      { id: 'AR-04', category: 'B', type: 'plan', code: 'AR-04', name: 'Planta de azotea', refArea: 200, complexity: 'Media', yieldRate: 50.00 },
+      { id: 'AR-05', category: 'B', type: 'plan', code: 'AR-05', name: 'Planta de acabados', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'AR-06', category: 'B', type: 'plan', code: 'AR-06', name: 'Planta de albañilería', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'AR-09', category: 'B', type: 'plan', code: 'AR-09', name: 'Fachadas', refArea: 200, complexity: 'Alta', yieldRate: 40.00 },
+      { id: 'AR-10', category: 'B', type: 'plan', code: 'AR-10', name: 'Cortes arquitectónicos', refArea: 200, complexity: 'Alta', yieldRate: 40.00 },
+      { id: 'AR-13', category: 'B', type: 'plan', code: 'AR-13', name: 'Detalles arquitectónicos', refArea: 200, complexity: 'Muy alta', yieldRate: 25.00 },
+      { id: 'AR-14', category: 'B', type: 'plan', code: 'AR-14', name: 'Detalles constructivos', refArea: 200, complexity: 'Muy alta', yieldRate: 20.00 },
+      { id: 'E-01', category: 'C', type: 'plan', code: 'E-01', name: 'Planta de cimentación', refArea: 200, complexity: 'Alta', yieldRate: 25.00 },
+      { id: 'E-03', category: 'C', type: 'plan', code: 'E-03', name: 'Planta estructural', refArea: 200, complexity: 'Alta', yieldRate: 25.00 },
+      { id: 'E-04', category: 'C', type: 'plan', code: 'E-04', name: 'Planta de losas', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'E-05', category: 'C', type: 'plan', code: 'E-05', name: 'Planta de trabes', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'E-12', category: 'C', type: 'plan', code: 'E-12', name: 'Memoria de cálculo estructural', refArea: 200, complexity: 'Muy alta', yieldRate: 1.00 },
+      { id: 'IS-01', category: 'E-F', type: 'plan', code: 'IS-01', name: 'Planta sanitaria', refArea: 200, complexity: 'Media', yieldRate: 33.33 },
+      { id: 'IS-03', category: 'E-F', type: 'plan', code: 'IS-03', name: 'Isométrico sanitario', refArea: 200, complexity: 'Alta', yieldRate: 40.00 },
+      { id: 'IPL-01', category: 'E-F', type: 'plan', code: 'IPL-01', name: 'Planta pluvial', refArea: 200, complexity: 'Media', yieldRate: 40.00 },
+      { id: 'IE-01', category: 'G', type: 'plan', code: 'IE-01', name: 'Planta de instalaciones eléctricas', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'IE-05', category: 'G', type: 'plan', code: 'IE-05', name: 'Cuadro de cargas', refArea: 200, complexity: 'Alta', yieldRate: 60.00 },
+      { id: 'IE-06', category: 'G', type: 'plan', code: 'IE-06', name: 'Diagrama unifilar', refArea: 200, complexity: 'Alta', yieldRate: 50.00 },
+      { id: 'IE-08', category: 'G', type: 'plan', code: 'IE-08', name: 'Sistema de puesta a tierra', refArea: 200, complexity: 'Alta', yieldRate: 50.00 },
+      { id: 'IG-01', category: 'H', type: 'plan', code: 'IG-01', name: 'Planta de gas', refArea: 200, complexity: 'Alta', yieldRate: 40.00 },
+      { id: 'HVAC-01', category: 'I', type: 'plan', code: 'HVAC-01', name: 'Planta de aire acondicionado', refArea: 200, complexity: 'Alta', yieldRate: 28.57 },
+      { id: 'IT-01', category: 'J-K', type: 'plan', code: 'IT-01', name: 'Planta de voz y datos', refArea: 200, complexity: 'Media', yieldRate: 40.00 },
+      { id: 'SC-01', category: 'J-K', type: 'plan', code: 'SC-01', name: 'Planta CCTV', refArea: 200, complexity: 'Media', yieldRate: 50.00 },
+      { id: 'UR-01', category: 'L', type: 'plan', code: 'UR-01', name: 'Planimetría urbana general', refArea: 1000, complexity: 'Alta', yieldRate: 100.00 },
+      { id: 'TO-01', category: 'M', type: 'plan', code: 'TO-01', name: 'Planimetría topográfica', refArea: 500, complexity: 'Media', yieldRate: 62.50 },
+      { id: 'TO-06', category: 'M', type: 'plan', code: 'TO-06', name: 'Coordenadas UTM', refArea: 500, complexity: 'Media', yieldRate: 125.00 },
+      { id: 'AM-01', category: 'N', type: 'plan', code: 'AM-01', name: 'Análisis de orientación solar', refArea: 300, complexity: 'Media', yieldRate: 75.00 }
+    ];
+
+    let catalog = [];
+    let selections = {};
+    let openCategories = {};
+    let adminEditMode = false;
+
+    function syncInputFromSlider() {
+      const sliderVal = document.getElementById('area-slider').value;
+      document.getElementById('total-area').value = sliderVal;
+      recalculateAll();
     }
 
-    function updateEstimate() {
-      const serviceKey = calcService.value;
-      const propertyMult = parseFloat(calcProperty.value);
-      let sqm = parseFloat(calcSqm.value) || 20;
-      if (sqm < 20) sqm = 20;
-
-      const rate = serviceRates[serviceKey];
-      // Factor de escala para superficies grandes
-      const scaleDiscount = sqm > 600 ? 0.82 : (sqm > 300 ? 0.9 : 1.0);
-      let minEstimate = (rate.base + (sqm * rate.perSqm * scaleDiscount)) * propertyMult;
-
-      if (extraMemoria.checked) minEstimate += 3800;
-      if (extraInstalaciones.checked) minEstimate += (4500 + sqm * 25);
-
-      minEstimate = Math.round(minEstimate / 100) * 100;
-      const maxEstimate = Math.round((minEstimate * 1.2) / 100) * 100;
-
-      const propText = calcProperty.options[calcProperty.selectedIndex].text;
-      calcTotal.textContent = `${formatMXN(minEstimate)} – ${formatMXN(maxEstimate)} MXN`;
-      calcSummary.textContent = `Basado en ${sqm.toLocaleString('es-MX')} m² para ${propText} • ${rate.label}.`;
+    function syncSliderFromInput() {
+      const inputVal = parseFloat(document.getElementById('total-area').value) || 0;
+      const slider = document.getElementById('area-slider');
+      if (inputVal >= 20 && inputVal <= 2500) slider.value = inputVal;
+      recalculateAll();
     }
 
-    calcSlider.addEventListener('input', () => {
-      calcSqm.value = calcSlider.value;
-      updateEstimate();
-    });
+    function initQuoter() {
+      trackSiteVisit();
+      try {
+        const saved = localStorage.getItem('stk_studio_catalog_v1');
+        catalog = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+      } catch (e) {
+        catalog = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+      }
+      CATEGORIES.forEach(c => { openCategories[c.id] = c.defaultOpen; });
+      selections = {};
+      renderCalendar();
+      renderConstructionChecklist();
+      updateProgramCardUI();
+      renderChecklist();
+      recalculateAll();
+    }
 
-    calcSqm.addEventListener('input', () => {
-      if (calcSqm.value <= 2500) calcSlider.value = calcSqm.value;
-      updateEstimate();
-    });
+    function handleProgramChange() {
+      const progKey = document.getElementById('service-program').value;
+      const preset = PROGRAM_PRESETS[progKey];
+      const constBox = document.getElementById('construction-partidas-box');
+      if (preset) {
+        constBox.classList.toggle('hidden', !preset.showConstruction);
+        if (Array.isArray(preset.codes)) {
+          selections = {};
+          catalog.forEach(item => {
+            if (preset.codes.includes(item.code)) selections[item.id] = true;
+          });
+        }
+      }
+      updateProgramCardUI();
+      renderChecklist();
+      recalculateAll();
+    }
 
-    [calcService, calcProperty, extraMemoria, extraInstalaciones].forEach(el => {
-      el.addEventListener('change', updateEstimate);
-    });
+    function updateProgramCardUI() {
+      const progKey = document.getElementById('service-program').value;
+      const preset = PROGRAM_PRESETS[progKey] || PROGRAM_PRESETS.personalizado;
+      document.getElementById('program-description-box').textContent = preset.desc;
+      document.getElementById('pkg-card-title').textContent = preset.title;
+      document.getElementById('pkg-card-note').textContent = preset.note;
+      document.getElementById('pkg-card-includes').innerHTML = preset.includes.map(txt =>
+        `<li class="flex items-start gap-2"><span class="text-forest-700 font-bold">✓</span><span>${txt}</span></li>`
+      ).join('');
+    }
 
-    updateEstimate();
+    function toggleInternalSettings() {
+      document.getElementById('internal-settings-panel').classList.toggle('hidden');
+    }
 
-    // Envío de Cotización por WhatsApp y Correo
-    document.getElementById('send-quote-wa').addEventListener('click', () => {
-      const msg = `Hola Ing. Arq. Agustín Patraca (STK Studio), realicé una estimación en su sitio web:\n\n` +
-                  `• Servicio: ${serviceRates[calcService.value].label}\n` +
-                  `• Inmueble: ${calcProperty.options[calcProperty.selectedIndex].text}\n` +
-                  `• Superficie: ${calcSqm.value} m²\n` +
-                  `• Estimado Preliminar: ${calcTotal.textContent}\n\n` +
-                  `Me gustaría agendar una asesoría para formalizar mi cotización.`;
-      window.open(`https://wa.me/525638006027?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
-    });
+    function toggleAdminEditMode() {
+      adminEditMode = !adminEditMode;
+      document.getElementById('btn-toggle-crud').innerHTML = adminEditMode
+        ? '<span>✓ Terminar Edición</span>'
+        : '<span>Editar / Borrar Conceptos</span>';
+      renderChecklist();
+    }
 
-    document.getElementById('send-quote-email').addEventListener('click', () => {
-      const subject = `Solicitud de Cotización Formal - STK Studio (${serviceRates[calcService.value].label})`;
-      const body = `Estimado Ing. Arq. Agustín Patraca Hernández,\n\n` +
-                   `Solicito una cotización formal con base en los siguientes parámetros:\n` +
-                   `- Servicio: ${serviceRates[calcService.value].label}\n` +
-                   `- Tipo de inmueble: ${calcProperty.options[calcProperty.selectedIndex].text}\n` +
-                   `- Superficie estimada: ${calcSqm.value} m²\n` +
-                   `- Rango estimado en web: ${calcTotal.textContent}\n\n` +
-                   `Quedo atento a su respuesta para coordinar revisión técnica.`;
-      window.location.href = `mailto:arquitecturastudiok@gmail.com?cc=patracahernandezadal@gmail.com&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    });
+    function renderConstructionChecklist() {
+      const container = document.getElementById('construction-checklist');
+      container.innerHTML = CONSTRUCTION_PARTIDAS.map((p, idx) => `
+        <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-forest-800/15 cursor-pointer">
+          <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleConstructionPartida(${idx})" class="stk-checkbox mt-0.5" />
+          <div class="text-xs">
+            <span class="font-semibold text-forest-900 block">${p.name}</span>
+            <span class="text-[11px] font-mono text-charcoal/65">${Math.round(p.weight * 100)}% del m² de obra</span>
+          </div>
+        </label>
+      `).join('');
+    }
 
-    // Formulario de Contacto Directo
+    function toggleConstructionPartida(idx) {
+      CONSTRUCTION_PARTIDAS[idx].selected = !CONSTRUCTION_PARTIDAS[idx].selected;
+      recalculateAll();
+    }
+
+    function toggleAccordion(catId) {
+      openCategories[catId] = !openCategories[catId];
+      renderChecklist();
+    }
+
+    function toggleItem(itemId) {
+      selections[itemId] = !selections[itemId];
+      renderChecklist();
+      recalculateAll();
+    }
+
+    function toggleAllInCategory(catId, state, e) {
+      e.stopPropagation();
+      catalog.forEach(item => {
+        if (item.category === catId) selections[item.id] = state;
+      });
+      renderChecklist();
+      recalculateAll();
+    }
+
+    function renderChecklist() {
+      const container = document.getElementById('checklist-accordions');
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      let html = '';
+
+      CATEGORIES.forEach(cat => {
+        const items = catalog.filter(item => {
+          if (item.category !== cat.id) return false;
+          if (!query) return true;
+          return item.name.toLowerCase().includes(query) || item.code.toLowerCase().includes(query);
+        });
+        if (items.length === 0) return;
+
+        const selectedCount = items.filter(i => !!selections[i.id]).length;
+        const isOpen = query ? true : !!openCategories[cat.id];
+
+        html += `
+          <div class="border border-forest-800/15 rounded-xl overflow-hidden bg-white">
+            <div onclick="toggleAccordion('${cat.id}')" class="px-4 py-2.5 bg-stonewarm-100 hover:bg-forest-50 cursor-pointer flex items-center justify-between gap-2 select-none transition">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-forest-700 font-mono w-3">${isOpen ? '▼' : '▶'}</span>
+                <span class="text-xs font-bold text-forest-900">${cat.label}</span>
+                ${selectedCount > 0 ? `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-forest-800 text-white">${selectedCount}</span>` : ''}
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="toggleAllInCategory('${cat.id}', true, event)" class="text-[11px] text-forest-800 hover:underline font-semibold">Todos</button>
+                <span class="text-forest-800/25">|</span>
+                <button type="button" onclick="toggleAllInCategory('${cat.id}', false, event)" class="text-[11px] text-charcoal/65 hover:underline">Ninguno</button>
+              </div>
+            </div>
+            <div class="${isOpen ? 'p-3.5 grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2.5' : 'hidden'}">
+              ${items.map(item => {
+                const checked = !!selections[item.id];
+                return `
+                  <div class="flex items-start justify-between gap-2">
+                    <label class="flex items-start gap-2.5 cursor-pointer flex-1">
+                      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleItem('${item.id}')" class="stk-checkbox mt-0.5" />
+                      <div class="text-xs leading-snug">
+                        <span class="${checked ? 'font-bold text-forest-900' : 'font-medium text-charcoal/85'}">${item.name}</span>
+                        <span class="block text-[10px] font-mono text-forest-700">${item.code}</span>
+                      </div>
+                    </label>
+                    ${adminEditMode ? `
+                      <div class="flex gap-1 shrink-0">
+                        <button type="button" onclick="openEditItemModal('${item.id}')" class="px-1.5 py-0.5 text-[10px] rounded bg-forest-100 text-forest-900 font-bold">Editar</button>
+                        <button type="button" onclick="deleteItem('${item.id}')" class="px-1.5 py-0.5 text-[10px] rounded bg-rose-100 text-rose-800 font-bold">X</button>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html || `<p class="text-xs text-center text-charcoal/60 py-4">Sin resultados para ese filtro.</p>`;
+    }
+
+    function getCombinedFactor() {
+      const typeSelect = document.getElementById('project-type');
+      const regSelect = document.getElementById('project-region');
+      const qualityKey = document.getElementById('project-quality').value;
+      const projFactor = parseFloat(typeSelect.options[typeSelect.selectedIndex].dataset.factor) || 1.0;
+      const regFactor = parseFloat(regSelect.options[regSelect.selectedIndex].dataset.regFactor) || 1.0;
+      const qualFactor = QUALITY_MULTIPLIER[qualityKey] || 1.0;
+      return projFactor * regFactor * qualFactor;
+    }
+
+    function getItemCost(item) {
+      const area = Math.max(0, parseFloat(document.getElementById('total-area').value) || 0);
+      const hourlyRate = Math.max(0, parseFloat(document.getElementById('param-hourly-rate').value) || 450);
+      const factor = getCombinedFactor();
+      if (item.type === 'survey') {
+        return area * item.unitPrice * (factor * 0.92 + 0.08);
+      }
+      const compFactor = COMPLEXITY_FACTORS[item.complexity] || 1.0;
+      const yieldVal = item.yieldRate > 0 ? item.yieldRate : 1;
+      return ((area / yieldVal) * compFactor) * hourlyRate * factor;
+    }
+
+    function getConstructionRatePerM2() {
+      const qualityKey = document.getElementById('project-quality').value;
+      const baseMap = {
+        basica: parseFloat(document.getElementById('const-rate-basica').value) || 11500,
+        media: parseFloat(document.getElementById('const-rate-media').value) || 16500,
+        alta: parseFloat(document.getElementById('const-rate-alta').value) || 22500,
+        lujo: parseFloat(document.getElementById('const-rate-lujo').value) || 29500
+      };
+      return baseMap[qualityKey] * getCombinedFactor();
+    }
+
+    function recalculateAll() {
+      const progKey = document.getElementById('service-program').value;
+      const preset = PROGRAM_PRESETS[progKey] || PROGRAM_PRESETS.personalizado;
+      const area = Math.max(0, parseFloat(document.getElementById('total-area').value) || 0);
+      const discount = Math.min(100, Math.max(0, parseFloat(document.getElementById('param-discount').value) || 0));
+      const includeIva = document.getElementById('param-iva').checked;
+
+      let subtotal = 0;
+      let count = 0;
+
+      catalog.forEach(item => {
+        if (selections[item.id]) {
+          count++;
+          subtotal += getItemCost(item);
+        }
+      });
+
+      const constRate = getConstructionRatePerM2();
+      document.getElementById('const-m2-label').textContent = `${formatCurrency(constRate)} / m²`;
+
+      if (preset.showConstruction) {
+        const activeWeight = CONSTRUCTION_PARTIDAS.reduce((acc, p) => p.selected ? acc + p.weight : acc, 0);
+        subtotal += area * constRate * activeWeight;
+        count += CONSTRUCTION_PARTIDAS.filter(p => p.selected).length;
+      }
+
+      subtotal = subtotal * (1 - discount / 100);
+      const total = includeIva ? subtotal * 1.16 : subtotal;
+      const perM2 = area > 0 ? total / area : 0;
+
+      document.getElementById('hero-total-amount').textContent = formatCurrency(total);
+      document.getElementById('hero-cost-per-m2').textContent = `${formatCurrency(perM2)} / m²`;
+      document.getElementById('pkg-card-rate').innerHTML = `${formatCurrency(perM2)} <span class="text-xs font-sans font-semibold text-charcoal/70">/ m²</span>`;
+      document.getElementById('count-selected-items').textContent = count;
+    }
+
+    function applyPreset(key) {
+      document.getElementById('service-program').value = key || 'personalizado';
+      handleProgramChange();
+      showToast('Paquete aplicado para revisión previa.', 'success');
+    }
+
+    function clearAllSelections() {
+      selections = {};
+      renderChecklist();
+      recalculateAll();
+    }
+
+    function openQuoteModal() {
+      const progKey = document.getElementById('service-program').value;
+      const preset = PROGRAM_PRESETS[progKey] || PROGRAM_PRESETS.personalizado;
+      const area = Math.max(0, parseFloat(document.getElementById('total-area').value) || 0);
+      const region = document.getElementById('project-region').value;
+      const typeSelect = document.getElementById('project-type');
+      const projectTypeLabel = typeSelect.options[typeSelect.selectedIndex].text;
+      const includeIva = document.getElementById('param-iva').checked;
+      const discount = Math.min(100, Math.max(0, parseFloat(document.getElementById('param-discount').value) || 0));
+
+      let rowsHtml = '';
+      let subtotal = 0;
+
+      catalog.forEach(item => {
+        if (selections[item.id]) {
+          const c = getItemCost(item);
+          subtotal += c;
+          rowsHtml += `
+            <tr class="border-b border-stonewarm-200 text-xs">
+              <td class="py-2 font-mono text-forest-800 font-semibold">${item.code}</td>
+              <td class="py-2 font-medium">${item.name}</td>
+              <td class="py-2 text-right font-mono">${formatCurrency(c)}</td>
+            </tr>
+          `;
+        }
+      });
+
+      if (preset.showConstruction) {
+        const rate = getConstructionRatePerM2();
+        CONSTRUCTION_PARTIDAS.forEach(p => {
+          if (p.selected) {
+            const c = area * rate * p.weight;
+            subtotal += c;
+            rowsHtml += `
+              <tr class="border-b border-stonewarm-200 text-xs">
+                <td class="py-2 font-mono text-forest-800 font-semibold">${p.id}</td>
+                <td class="py-2 font-medium">${p.name} (${area} m²)</td>
+                <td class="py-2 text-right font-mono">${formatCurrency(c)}</td>
+              </tr>
+            `;
+          }
+        });
+      }
+
+      if (!rowsHtml) {
+        showToast('Selecciona al menos un concepto para generar el detalle.', 'error');
+        return;
+      }
+
+      const afterDisc = subtotal * (1 - discount / 100);
+      const iva = includeIva ? afterDisc * 0.16 : 0;
+      const total = afterDisc + iva;
+
+      saveClientRecord({
+        name: 'Cotización en Línea',
+        phone: 'Sin teléfono aún',
+        email: 'Sin correo aún',
+        type: `${projectTypeLabel} (${area} m²)`,
+        amount: formatCurrency(total)
+      });
+
+      document.getElementById('formal-quote-content').innerHTML = `
+        <div class="flex flex-wrap justify-between items-start gap-4 border-b-2 border-forest-800 pb-4">
+          <div>
+            <h1 class="font-serif text-2xl font-bold uppercase tracking-wider text-forest-900">STK Studio | Ingeniería y Arquitectura</h1>
+            <p class="text-xs text-charcoal/75">Ing. Arq. Agustín Patraca Hernández • IPN ESIA Tecamachalco</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-amber-900 bg-amber-100 inline-block px-2.5 py-0.5 rounded mt-1.5">
+              Aproximado · Cotización Previa a Autorización
+            </p>
+            <p class="text-xs text-charcoal/70 mt-1">Tel: 56 3800 6027 • arquitecturastudiok@gmail.com</p>
+          </div>
+          <div class="text-right text-xs text-charcoal/75">
+            <p>Fecha: <strong>${new Date().toLocaleDateString('es-MX')}</strong></p>
+            <p>Región: <strong>${region}</strong></p>
+            <p>Superficie: <strong class="font-mono">${area.toLocaleString('es-MX')} m²</strong></p>
+          </div>
+        </div>
+        <div class="text-xs bg-forest-50 border border-forest-800/15 p-3.5 rounded-xl text-forest-900">
+          <strong>Tipo de Proyecto:</strong> ${projectTypeLabel} · <strong>Programa:</strong> ${preset.title}
+        </div>
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-[11px] uppercase text-forest-800 border-b border-forest-800/20">
+              <th class="py-2 w-24">Clave</th>
+              <th class="py-2">Concepto / Servicio</th>
+              <th class="py-2 text-right w-32">Estimado MXN</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="flex justify-end pt-3 border-t border-forest-800/20">
+          <div class="w-full sm:w-80 space-y-1 text-xs">
+            <div class="flex justify-between"><span>Subtotal aproximado:</span><span class="font-mono">${formatCurrency(afterDisc)}</span></div>
+            ${includeIva ? `<div class="flex justify-between"><span>IVA (16%):</span><span class="font-mono">${formatCurrency(iva)}</span></div>` : ''}
+            <div class="flex justify-between font-extrabold text-base pt-2 border-t border-forest-800 text-forest-900">
+              <span>TOTAL APROXIMADO:</span>
+              <span class="font-mono">${formatCurrency(total)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('print-modal').classList.remove('hidden');
+    }
+
+    function closeQuoteModal() {
+      document.getElementById('print-modal').classList.add('hidden');
+    }
+
+    function buildBookingSummaryText(canal) {
+      const progKey = document.getElementById('service-program').value;
+      const preset = PROGRAM_PRESETS[progKey] || PROGRAM_PRESETS.personalizado;
+      const typeSelect = document.getElementById('project-type');
+      const projectTypeLabel = typeSelect.options[typeSelect.selectedIndex].text;
+      const region = document.getElementById('project-region').value;
+      const area = document.getElementById('total-area').value;
+      const total = document.getElementById('hero-total-amount').textContent;
+      const count = document.getElementById('count-selected-items').textContent;
+
+      return `Hola Ing. Arq. Agustín Patraca (STK Studio), me gustaría revisar mi proyecto por ${canal}:\n\n` +
+        `• Tipo de proyecto: ${projectTypeLabel}\n` +
+        `• Programa: ${preset.title}\n` +
+        `• Región: ${region}\n` +
+        `• Área aproximada: ${area} m²\n` +
+        `• Conceptos seleccionados: ${count}\n` +
+        `• Estimado previo: ${total} MXN`;
+    }
+
+    function sendQuoteByEmail(mode) {
+      const area = document.getElementById('total-area').value;
+      const region = document.getElementById('project-region').value;
+      const total = document.getElementById('hero-total-amount').textContent;
+      const motivo = mode === 'ajuste' ? 'Ajuste de presupuesto / alcance' : 'Formalización de cotización previa';
+
+      const subject = encodeURIComponent(`STK Studio (${motivo}) — ${area} m² (${region})`);
+      const body = encodeURIComponent(
+        `Estimado Ing. Arq. Agustín Patraca Hernández,\n\n` +
+        `Revisé el cotizador punto por punto de STK Studio (Aproximado · Cotización Previa a Autorización):\n` +
+        `• Motivo: ${motivo}\n` +
+        `• Región: ${region}\n` +
+        `• Superficie: ${area} m²\n` +
+        `• Estimado previo: ${total} MXN\n\n` +
+        `Quedo atento para revisar detalles y formalizar el alcance mediante contrato de prestación de servicios.`
+      );
+      window.location.href = `mailto:arquitecturastudiok@gmail.com?subject=${subject}&body=${body}`;
+    }
+
+    function scheduleWhatsAppAdvisory() {
+      const message = encodeURIComponent(buildBookingSummaryText('WhatsApp'));
+      window.open(`https://wa.me/525638006027?text=${message}`, '_blank', 'noopener,noreferrer');
+      showToast('Abriendo WhatsApp Business de STK Studio...', 'success');
+    }
+
+    function scheduleMeetMeeting() {
+      const summary = buildBookingSummaryText('Google Meet');
+      const subject = encodeURIComponent('Solicitud de Reunión por Google Meet — STK Studio');
+      const body = encodeURIComponent(`${summary}\n\nEnlace Google Meet: https://meet.google.com/new`);
+      window.open('https://meet.google.com/new', '_blank', 'noopener,noreferrer');
+      window.location.href = `mailto:arquitecturastudiok@gmail.com?subject=${subject}&body=${body}`;
+      showToast('Iniciando agenda de reunión por Google Meet...', 'success');
+    }
+
+    // =========================================================================
+    // ADMIN CRUD & JSON
+    // =========================================================================
+    function populateCategoryDropdown() {
+      document.getElementById('edit-item-category').innerHTML = CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+    }
+    function toggleItemFormFields() {
+      const type = document.getElementById('edit-item-type').value;
+      document.getElementById('fields-survey').classList.toggle('hidden', type !== 'survey');
+      document.getElementById('fields-plan').classList.toggle('hidden', type === 'survey');
+    }
+    function openNewItemModal() {
+      populateCategoryDropdown();
+      document.getElementById('item-modal-title').textContent = 'Integrar Nuevo Programa / Servicio';
+      document.getElementById('edit-item-id').value = '';
+      document.getElementById('edit-item-code').value = '';
+      document.getElementById('edit-item-name').value = '';
+      toggleItemFormFields();
+      document.getElementById('item-modal').classList.remove('hidden');
+    }
+    function openEditItemModal(id) {
+      const item = catalog.find(i => i.id === id);
+      if (!item) return;
+      populateCategoryDropdown();
+      document.getElementById('item-modal-title').textContent = `Editar: ${item.code}`;
+      document.getElementById('edit-item-id').value = item.id;
+      document.getElementById('edit-item-type').value = item.type;
+      document.getElementById('edit-item-category').value = item.category;
+      document.getElementById('edit-item-code').value = item.code;
+      document.getElementById('edit-item-name').value = item.name;
+      if (item.type === 'survey') {
+        document.getElementById('edit-item-price').value = item.unitPrice;
+      } else {
+        document.getElementById('edit-item-ref-area').value = item.refArea || 200;
+        document.getElementById('edit-item-yield').value = item.yieldRate || 35;
+        document.getElementById('edit-item-complexity').value = item.complexity || 'Media';
+      }
+      toggleItemFormFields();
+      document.getElementById('item-modal').classList.remove('hidden');
+    }
+    function closeItemModal() { document.getElementById('item-modal').classList.add('hidden'); }
+    function saveCustomItem(e) {
+      e.preventDefault();
+      const existingId = document.getElementById('edit-item-id').value;
+      const type = document.getElementById('edit-item-type').value;
+      const newObj = {
+        id: existingId || `PROG-${Date.now()}`,
+        category: document.getElementById('edit-item-category').value,
+        type,
+        code: document.getElementById('edit-item-code').value.trim(),
+        name: document.getElementById('edit-item-name').value.trim()
+      };
+      if (type === 'survey') {
+        newObj.unitPrice = parseFloat(document.getElementById('edit-item-price').value) || 0;
+        newObj.unit = 'm²';
+      } else {
+        newObj.refArea = parseFloat(document.getElementById('edit-item-ref-area').value) || 200;
+        newObj.yieldRate = parseFloat(document.getElementById('edit-item-yield').value) || 35;
+        newObj.complexity = document.getElementById('edit-item-complexity').value;
+      }
+      if (existingId) {
+        const idx = catalog.findIndex(i => i.id === existingId);
+        if (idx !== -1) catalog[idx] = newObj;
+      } else {
+        catalog.push(newObj);
+        selections[newObj.id] = true;
+      }
+      localStorage.setItem('stk_studio_catalog_v1', JSON.stringify(catalog));
+      closeItemModal();
+      renderChecklist();
+      recalculateAll();
+      showToast('Programa/servicio guardado.', 'success');
+    }
+    function deleteItem(id) {
+      catalog = catalog.filter(i => i.id !== id);
+      delete selections[id];
+      localStorage.setItem('stk_studio_catalog_v1', JSON.stringify(catalog));
+      renderChecklist();
+      recalculateAll();
+    }
+    function resetCatalogToDefault() {
+      catalog = JSON.parse(JSON.stringify(DEFAULT_CATALOG));
+      localStorage.removeItem('stk_studio_catalog_v1');
+      renderChecklist();
+      recalculateAll();
+      showToast('Catálogo base restaurado.', 'info');
+    }
+    function openEmbedModal() {
+      document.getElementById('json-data-box').value = JSON.stringify(catalog, null, 2);
+      document.getElementById('embed-modal').classList.remove('hidden');
+    }
+    function closeEmbedModal() { document.getElementById('embed-modal').classList.add('hidden'); }
+    function importJSONData() {
+      try {
+        const parsed = JSON.parse(document.getElementById('json-data-box').value);
+        if (!Array.isArray(parsed)) throw new Error();
+        catalog = parsed;
+        localStorage.setItem('stk_studio_catalog_v1', JSON.stringify(catalog));
+        renderChecklist();
+        recalculateAll();
+        showToast('JSON importado correctamente.', 'success');
+      } catch (e) { showToast('Formato JSON inválido.', 'error'); }
+    }
+    function copyTextFromId(id) {
+      const el = document.getElementById(id);
+      el.select();
+      document.execCommand('copy');
+      showToast('Copiado al portapapeles.', 'success');
+    }
+
+    function formatCurrency(num) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency', currency: 'MXN', minimumFractionDigits: 2, maximumFractionDigits: 2
+      }).format(num || 0);
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const div = document.createElement('div');
+      div.className = `pointer-events-auto px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold text-white ${
+        type === 'error' ? 'bg-rose-800' : 'bg-forest-800 border border-bronze-400/40'
+      }`;
+      div.textContent = msg;
+      container.appendChild(div);
+      setTimeout(() => div.remove(), 2800);
+    }
+
+    // =========================================================================
+    // FORMULARIO DE CONTACTO DIRECTO
+    // =========================================================================
     const contactForm = document.getElementById('contact-form');
     const formFeedback = document.getElementById('form-feedback');
 
-    contactForm.addEventListener('submit', (e) => {
+    if (contactForm) {
+      contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('form-name').value.trim();
+        const phone = document.getElementById('form-phone').value.trim();
+        const email = document.getElementById('form-email').value.trim();
+        const service = document.getElementById('form-service').value;
+        const location = document.getElementById('form-location').value.trim();
+        const message = document.getElementById('form-message').value.trim();
+
+        saveClientRecord({ name, phone, email: email || 'N/A', type: service, amount: 'Consulta' });
+
+        const waText = `Hola Ing. Arq. Agustín Patraca (STK Studio), solicito una consulta técnica:\n\n` +
+          `• Nombre: ${name}\n• Teléfono: ${phone}\n` +
+          (email ? `• Correo: ${email}\n` : '') +
+          `• Área: ${service}\n` +
+          (location ? `• Ubicación del predio: ${location}\n` : '') +
+          `• Detalles: ${message}`;
+
+        formFeedback.textContent = 'Abriendo WhatsApp Business con los datos de tu consulta...';
+        formFeedback.classList.remove('hidden');
+        window.open(`https://wa.me/525638006027?text=${encodeURIComponent(waText)}`, '_blank', 'noopener,noreferrer');
+      });
+    }
+
+    const emailBtn = document.getElementById('form-email-btn');
+    if (emailBtn) {
+      emailBtn.addEventListener('click', () => {
+        const name = document.getElementById('form-name').value.trim() || 'Cliente Interesado';
+        const phone = document.getElementById('form-phone').value.trim();
+        const email = document.getElementById('form-email').value.trim() || 'N/A';
+        const service = document.getElementById('form-service').value;
+        const location = document.getElementById('form-location').value.trim();
+        const message = document.getElementById('form-message').value.trim();
+
+        saveClientRecord({ name, phone, email, type: service, amount: 'Consulta Correo' });
+
+        const subject = `Consulta Técnica STK Studio - ${service} (${name})`;
+        const body = `Nombre: ${name}\nTeléfono: ${phone}\nCorreo: ${email}\nServicio: ${service}\nUbicación: ${location}\n\nDescripción del proyecto:\n${message}`;
+        window.location.href = `mailto:arquitecturastudiok@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      });
+    }
+
+    // =========================================================================
+    // ACCESO Y PANEL DE ARQUITECTO
+    // =========================================================================
+    let logoClickCount = 0;
+    let logoClickTimer = null;
+
+    function handleLogoClick(e) {
+      logoClickCount++;
+      clearTimeout(logoClickTimer);
+      logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 800);
+      if (logoClickCount >= 3) {
+        e.preventDefault();
+        logoClickCount = 0;
+        openArchitectLoginModal();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        openArchitectLoginModal();
+      }
+    });
+
+    function openArchitectLoginModal() {
+      const m = document.getElementById('architect-login-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeArchitectLoginModal() {
+      const m = document.getElementById('architect-login-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function handleArchitectLogin(e) {
       e.preventDefault();
-      const name = document.getElementById('form-name').value.trim();
-      const phone = document.getElementById('form-phone').value.trim();
-      const email = document.getElementById('form-email').value.trim();
-      const service = document.getElementById('form-service').value;
-      const location = document.getElementById('form-location').value.trim();
-      const message = document.getElementById('form-message').value.trim();
+      const u = document.getElementById('auth-user').value.trim();
+      const p = document.getElementById('auth-pass').value.trim();
+      if (u === 'arq.stk' && p === 'STK2026') {
+        closeArchitectLoginModal();
+        openArchitectDashboard();
+        showToast('Bienvenido Ing. Arq. Agustín Patraca.', 'success');
+      } else {
+        showToast('Usuario o contraseña incorrectos.', 'error');
+      }
+    }
 
-      const waText = `Hola Ing. Arq. Agustín Patraca (STK Studio), solicito una consulta técnica:\n\n` +
-                     `• Nombre: ${name}\n` +
-                     `• Teléfono: ${phone}\n` +
-                     (email ? `• Correo: ${email}\n` : '') +
-                     `• Área: ${service}\n` +
-                     (location ? `• Ubicación del predio: ${location}\n` : '') +
-                     `• Detalles: ${message}`;
+    function openArchitectDashboard() {
+      renderDashboardData();
+      document.getElementById('architect-dashboard-modal').classList.remove('hidden');
+    }
 
-      formFeedback.textContent = 'Abriendo WhatsApp Business con los datos de tu consulta...';
-      formFeedback.classList.remove('hidden');
-      window.open(`https://wa.me/525638006027?text=${encodeURIComponent(waText)}`, '_blank', 'noopener,noreferrer');
-    });
+    function closeArchitectDashboard() {
+      document.getElementById('architect-dashboard-modal').classList.add('hidden');
+    }
 
-    document.getElementById('form-email-btn').addEventListener('click', () => {
-      const name = document.getElementById('form-name').value.trim() || 'Cliente Interesado';
-      const phone = document.getElementById('form-phone').value.trim();
-      const service = document.getElementById('form-service').value;
-      const location = document.getElementById('form-location').value.trim();
-      const message = document.getElementById('form-message').value.trim();
+    function trackSiteVisit() {
+      try {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const timeStr = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+        let stats = JSON.parse(localStorage.getItem('stk_visits_v1') || '{"total":0,"todayDate":"","todayCount":0,"lastTime":""}');
+        stats.total += 1;
+        if (stats.todayDate === todayStr) {
+          stats.todayCount += 1;
+        } else {
+          stats.todayDate = todayStr;
+          stats.todayCount = 1;
+        }
+        stats.lastTime = timeStr;
+        localStorage.setItem('stk_visits_v1', JSON.stringify(stats));
+      } catch (e) {}
+    }
 
-      const subject = `Consulta Técnica STK Studio - ${service} (${name})`;
-      const body = `Nombre: ${name}\nTeléfono: ${phone}\nServicio: ${service}\nUbicación: ${location}\n\nDescripción del proyecto:\n${message}`;
-      window.location.href = `mailto:arquitecturastudiok@gmail.com?cc=patracahernandezadal@gmail.com&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    });
+    function saveBookingToDB(booking) {
+      try {
+        const list = JSON.parse(localStorage.getItem('stk_bookings_v1') || '[]');
+        list.unshift({ ...booking, id: Date.now(), service: 'Asesoría Online (45m)', amount: '$900 MXN' });
+        localStorage.setItem('stk_bookings_v1', JSON.stringify(list));
+        saveClientRecord({
+          name: booking.clientName,
+          phone: booking.clientPhone,
+          email: booking.clientEmail,
+          type: `Cita ${booking.date} ${booking.time}`,
+          amount: '$900 MXN'
+        });
+      } catch (e) {}
+    }
+
+    function saveClientRecord(client) {
+      try {
+        const list = JSON.parse(localStorage.getItem('stk_clients_v1') || '[]');
+        list.unshift({
+          ...client,
+          id: Date.now(),
+          date: new Date().toLocaleDateString('es-MX')
+        });
+        localStorage.setItem('stk_clients_v1', JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function renderDashboardData() {
+      const stats = JSON.parse(localStorage.getItem('stk_visits_v1') || '{"total":0,"todayCount":0,"lastTime":"—"}');
+      const bookings = JSON.parse(localStorage.getItem('stk_bookings_v1') || '[]');
+      const clients = JSON.parse(localStorage.getItem('stk_clients_v1') || '[]');
+
+      document.getElementById('dash-total-visits').textContent = stats.total;
+      document.getElementById('dash-today-visits').textContent = stats.todayCount;
+      document.getElementById('dash-last-visit-time').textContent = `Última: ${stats.lastTime}`;
+      document.getElementById('dash-total-bookings').textContent = bookings.length;
+      document.getElementById('dash-total-quotes').textContent = clients.length;
+
+      document.getElementById('dash-bookings-tbody').innerHTML = bookings.length ? bookings.map(b => `
+        <tr class="border-b border-stonewarm-200 hover:bg-stonewarm-50">
+          <td class="p-3 font-mono font-bold">${b.date}</td>
+          <td class="p-3 font-mono">${b.time}</td>
+          <td class="p-3 font-semibold">${b.clientName}</td>
+          <td class="p-3 font-mono">${b.clientPhone}</td>
+          <td class="p-3">${b.service}</td>
+          <td class="p-3 font-mono font-bold text-forest-800">${b.amount}</td>
+          <td class="p-3 text-right">
+            <button onclick="deleteBooking(${b.id})" class="text-rose-700 hover:underline font-semibold">Eliminar</button>
+          </td>
+        </tr>
+      `).join('') : `<tr><td colspan="7" class="p-6 text-center text-charcoal/50">No hay citas registradas aún.</td></tr>`;
+
+      document.getElementById('dash-clients-tbody').innerHTML = clients.length ? clients.map(c => `
+        <tr class="border-b border-stonewarm-200 hover:bg-stonewarm-50">
+          <td class="p-3 font-mono">${c.date}</td>
+          <td class="p-3 font-semibold">${c.name}</td>
+          <td class="p-3 font-mono">${c.phone}</td>
+          <td class="p-3 font-mono">${c.email}</td>
+          <td class="p-3">${c.type}</td>
+          <td class="p-3 font-mono font-bold text-forest-800">${c.amount}</td>
+          <td class="p-3 text-right">
+            <button onclick="deleteClient(${c.id})" class="text-rose-700 hover:underline font-semibold">Eliminar</button>
+          </td>
+        </tr>
+      `).join('') : `<tr><td colspan="7" class="p-6 text-center text-charcoal/50">No hay clientes registrados aún.</td></tr>`;
+    }
+
+    function deleteBooking(id) {
+      const list = JSON.parse(localStorage.getItem('stk_bookings_v1') || '[]').filter(i => i.id !== id);
+      localStorage.setItem('stk_bookings_v1', JSON.stringify(list));
+      renderDashboardData();
+    }
+
+    function deleteClient(id) {
+      const list = JSON.parse(localStorage.getItem('stk_clients_v1') || '[]').filter(i => i.id !== id);
+      localStorage.setItem('stk_clients_v1', JSON.stringify(list));
+      renderDashboardData();
+    }
+
+    function clearBookingsRegistry() {
+      localStorage.removeItem('stk_bookings_v1');
+      renderDashboardData();
+    }
+
+    function clearClientsRegistry() {
+      localStorage.removeItem('stk_clients_v1');
+      renderDashboardData();
+    }
+
+    function exportDataToCSV() {
+      const clients = JSON.parse(localStorage.getItem('stk_clients_v1') || '[]');
+      if (!clients.length) {
+        showToast('No hay datos de clientes para exportar.', 'error');
+        return;
+      }
+      const headers = ['Fecha', 'Nombre', 'Telefono', 'Correo', 'Proyecto/Tipo', 'Estimado'];
+      const rows = clients.map(c => [c.date, c.name, c.phone, c.email, c.type, c.amount].map(val => `"${String(val || '').replace(/"/g, '""')}"`).join(','));
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csvContent));
+      link.setAttribute('download', `STK_Studio_Clientes_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Archivo CSV descargado.', 'success');
+    }
+
+    window.addEventListener('DOMContentLoaded', initQuoter);
   </script>
 </body>
 </html>
